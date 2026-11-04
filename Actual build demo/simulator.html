@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<!-- S4: no network calls. Only this folder's own scripts and styles can load. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file:; img-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<title>HireIntercept Simulator</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="logo">HI</span>HireIntercept <small>Component simulator</small></div>
+    <span class="chip" id="source">Sample data</span>
+    <div class="top-right">
+      <button class="btn" id="import-btn" title="Import a jobs, candidates or events CSV. The type is detected from the header row.">Import CSV…</button>
+      <input id="import-file" type="file" accept=".csv,text/csv" multiple hidden>
+      <button class="btn" id="sample-btn">Load sample data</button>
+      <button class="btn" id="reset-btn">Reset decisions</button>
+      <a class="btn" href="explainer.html">Read the guide →</a>
+    </div>
+  </div>
+</header>
+<div class="wb">
+  <nav class="side" id="side" aria-label="Components"></nav>
+  <main id="main"><p class="muted">Loading…</p></main>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="js/rules.js"></script>
+<script src="js/csv.js"></script>
+<script src="js/sample-data.js"></script>
+<script src="js/sources.js"></script>
+<script src="js/normalize.js"></script>
+<script src="js/dedup.js"></script>
+<script src="js/eligibility.js"></script>
+<script src="js/matching.js"></script>
+<script src="js/scoring.js"></script>
+<script src="js/campaign.js"></script>
+<script src="js/assignment.js"></script>
+<script src="js/followups.js"></script>
+<script src="js/metrics.js"></script>
+<script src="js/outreach.js"></script>
+<script src="js/quality.js"></script>
+<script src="js/pipeline.js"></script>
+<script src="js/store.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/components.js"></script>
+<script src="js/simulator.js"></script>
+</body>
+</html>

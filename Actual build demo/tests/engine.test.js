@@ -183,5 +183,12 @@ test("A simulated reply cancels pending follow-ups for that contact", () => {
   assert.strictEqual(T.funnel.values.overall.replied_negative, S.funnel.values.overall.replied_negative, "simulated events never touch history metrics");
 });
 
+console.log("Product build");
+test("App-product.html contains every engine and product file unchanged (rebuild with node tools/build-product.js if this fails)", () => {
+  const html = fs.readFileSync(path.join(root, "..", "App-product.html"), "utf8");
+  FILES.map((f) => "js/" + f + ".js").concat(["js/store.js", "js/ui.js", "product/product-config.js", "product/product.js", "product/product.css"])
+    .forEach((f) => assert.ok(html.includes(fs.readFileSync(path.join(root, f), "utf8")), f + " is out of date in App-product.html"));
+});
+
 console.log("\n" + passed + " passed, " + failed + " failed");
 process.exit(failed ? 1 : 0);

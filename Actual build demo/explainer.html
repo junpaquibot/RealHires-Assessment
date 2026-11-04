@@ -3,25 +3,172 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
 <!-- S4: no network calls. Only this folder's own scripts and styles can load. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file:; img-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
-<title>HireIntercept Explained</title>
+<title>HireIntercept Guide</title>
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<header class="top">
-  <div class="bar-row">
-    <div class="brand">
-      <h1>HireIntercept <span class="muted">· explainer view</span></h1>
-      <small>The same app, opened up part by part. Every number is live from the same pipeline run as the app view, including any reviewer decisions you've made there. It always uses the sample data: imported files stay in the app view.</small>
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="logo">HI</span>HireIntercept <small>Guide to the build</small></div>
+    <div class="top-right">
+      <a class="btn" href="simulator.html">Open the simulator →</a>
     </div>
-    <div class="actions"><a href="index.html">← App view</a></div>
   </div>
 </header>
-<main>
-  <div class="ex-flow" id="flow" aria-label="Pipeline order"></div>
-  <div id="components"><p class="muted">Loading…</p></div>
-</main>
+
+<div class="guide">
+  <nav class="toc" aria-label="Contents">
+    <h4>Contents</h4>
+    <a href="#files">The files</a>
+    <a href="#flow">How it fits together</a>
+    <a href="#stages">Each step, in plain words</a>
+    <a href="#run">Running and changing it</a>
+    <a href="#live">Taking it live</a>
+    <a href="#path">Path to production</a>
+    <a href="#integrations">Real integrations</a>
+    <a href="#risks">Risks</a>
+    <a href="#limits">What's simplified</a>
+  </nav>
+
+  <article class="doc">
+    <div class="hero">
+      <h1>How HireIntercept is built, and how to take it live</h1>
+      <p>A plain-language guide to the prototype: what each part does, how the parts connect, and what it would take to run this as a real app for the Real Hires team. Numbers marked <b>Live</b> come straight from the running code.</p>
+    </div>
+
+    <section id="files">
+      <h2>The files</h2>
+      <p class="lede">Each one serves a different audience.</p>
+      <div class="arch">
+        <div><b>build-plan.html</b>The big picture. A clickable map of how every part connects. Standalone.</div>
+        <div><b>App-product.html</b>The product as one standalone file: the dashboard the team would use, behind a sign-in.</div>
+        <div><b>Actual build demo/index.html</b>The same product, running from the separate component files. App-product.html is this page packed into one file.</div>
+        <div><b>Actual build demo/simulator.html</b>The component simulator. Open each component to see its live result, settings, real code and deployment options, import messy files, or simulate replies.</div>
+        <div><b>Actual build demo/explainer.html</b>This guide.</div>
+      </div>
+    </section>
+
+    <section id="flow">
+      <h2>How it fits together</h2>
+      <p class="lede">Three files go in, one function runs every rule in order, and the dashboard shows the result.</p>
+      <div class="arch">
+        <div><b>1 · Input</b>Job postings, candidates and campaign events (CSV files today; Apollo and Finally Staff later).</div>
+        <div><b>2 · Processing</b>The rules engine: normalize, deduplicate, check eligibility, match candidates, score, write emails, check every send, track results, apply stop rules.</div>
+        <div><b>3 · Dashboard</b>The front-end. It only shows results; it never makes decisions itself.</div>
+        <div><b>Employee</b>Uses the dashboard and decides anything the rules won't decide alone. Every decision re-runs the engine.</div>
+      </div>
+      <p>In code, all of Processing is one function: <code>pipeline.run(files, decisions)</code>. It takes the raw files plus any employee decisions and returns a single snapshot. The product, the simulator and this guide all read that same snapshot, so they can never disagree.</p>
+      <div class="live"><span class="tag">Live</span><span><b id="n-postings">…</b> postings</span><span>→ <b id="n-leads">…</b> leads</span><span>→ <b id="n-eligible">…</b> eligible</span><span>· <b id="n-waiting">…</b> waiting for an employee</span><span>· <b id="n-sent">…</b> emails in the history, <b id="n-flagged">…</b> flagged ⚠</span></div>
+    </section>
+
+    <section id="stages">
+      <h2>Each step, in plain words</h2>
+      <p class="lede">In the order the data flows. "See it running" opens that step in the simulator.</p>
+      <div id="stages-list"><p class="muted">Loading…</p></div>
+    </section>
+
+    <section id="run">
+      <h2>Running and changing it</h2>
+      <p class="lede">No install is needed to run it. Node.js is only needed for the extras.</p>
+      <h3>Run</h3>
+      <p>Double-click any HTML file. Everything works offline, from the folder, with the sample data built in.</p>
+      <h3>Test the rules</h3>
+      <div class="cmd">cd "Actual build demo"
+node tests/engine.test.js</div>
+      <p>28 checks: the lead counts, who is eligible, the scores, candidate assignment, drafts, the funnel numbers and the stop rules.</p>
+      <h3>Change a rule</h3>
+      <p>Every weight, keyword and schedule is in <code>js/rules.js</code>. For example, to give candidate fit more weight, change <code>weights.fit</code> and <code>fitPoints.verified</code>. Then reload the simulator: every component updates. Run the tests to see which agreed outcomes would change.</p>
+      <h3>Rebuild the product after a change</h3>
+      <div class="cmd">node tools/build-product.js     # packs index.html into ../App-product.html
+node tools/embed-data.js        # only if you edited data/*.csv</div>
+    </section>
+
+    <section id="live">
+      <h2>Taking it live</h2>
+      <p class="lede">The prototype runs in one browser. A live app needs a server, a database and a background worker, so it keeps working when nobody has it open.</p>
+
+      <h3>Recommended: TypeScript full-stack</h3>
+      <p>A Node.js backend with Postgres, serving the same dashboard. The prototype's JavaScript modules move to the server almost unchanged, and one language covers the backend, the front-end and the integrations. That keeps the team small and the rules shared.</p>
+      <div class="arch">
+        <div><b>Web app + API</b>Serves the dashboard and handles employee actions. Behind a company login (SSO).</div>
+        <div><b>Postgres</b>Leads, candidates, events, decisions, suppression list and audit log.</div>
+        <div><b>Worker + job queue</b>Runs syncs, scoring and follow-ups. Every send job runs the suppression check first.</div>
+        <div><b>Scheduler</b>Cron jobs: sync postings and candidates, and roll up campaign numbers.</div>
+        <div><b>Webhook endpoint</b>Receives Apollo events (replies, bounces, unsubscribes) within seconds.</div>
+        <div><b>Hosting</b>One PaaS (e.g. Render, Railway or Fly.io) for app, worker and database. Simple to run.</div>
+      </div>
+
+      <h3>Alternatives</h3>
+      <ul class="bul">
+        <li><b>Python backend (FastAPI + Postgres):</b> strong if scoring becomes data-science heavy. The cost is that the rules get rewritten and the team works in two languages.</li>
+        <li><b>Low-code (n8n or Zapier + Airtable):</b> the fastest to stand up. But stop rules, deduplication and audit trails are hard to test, and they get fragile as volume grows.</li>
+      </ul>
+
+      <h3>What moves where</h3>
+      <p>Each component, what it is today, and the recommended production version. The simulator's "Deploying it" tab has the full set of options for each.</p>
+      <div id="moves"></div>
+    </section>
+
+    <section id="path">
+      <h2>Path to production</h2>
+      <p class="lede">The order that gets value earliest, with the safety rules in place before any real email goes out.</p>
+      <ol class="steps">
+        <li><b>Backend and database.</b> Move the modules server-side unchanged. Store leads, events, decisions and the audit log in Postgres. Keep the tests running in CI.</li>
+        <li><b>Login.</b> Company SSO (Google Workspace or Microsoft). Replaces the prototype's demo sign-in.</li>
+        <li><b>Read-only integrations.</b> Sync job postings from Apollo and candidates from Finally Staff. No sending yet: just check the leads and matches look right.</li>
+        <li><b>Events and suppression.</b> Apollo webhooks into the events table, and a suppression list synced both ways. Prove the stop rules work on real data.</li>
+        <li><b>Sending, gated.</b> Approved drafts go to Apollo sequences through the worker. Every send runs the suppression check first. Start with a small daily cap.</li>
+        <li><b>Measure.</b> Grow the A/B test until each variant has enough emails to compare honestly.</li>
+        <li><b>Monitoring.</b> Alerts if a sync fails, bounces rise, or a send happens without a passing check.</li>
+      </ol>
+    </section>
+
+    <section id="integrations">
+      <h2>Real integrations</h2>
+      <h3>Apollo (leads, contacts, sequences)</h3>
+      <ul class="bul">
+        <li>API key kept on the server, never in the browser.</li>
+        <li><b>Pull:</b> companies and postings on a schedule, plus a real contact per company. This replaces "contact = company domain".</li>
+        <li><b>Push:</b> approved emails into one sequence per variant, with the variant recorded on our side.</li>
+        <li><b>Webhooks:</b> sent, delivered, opened, replied, bounced and unsubscribed events, stored once each by event ID.</li>
+        <li>Suppression synced both ways, so an unsubscribe in either system blocks both.</li>
+      </ul>
+      <h3>Finally Staff (candidates)</h3>
+      <ul class="bul">
+        <li>Candidate profiles with skills (ideally a shared skills list), available-now with a date, U.S.-hours availability, location and licences.</li>
+        <li>A reservation or status field, so "one candidate, one company at a time" holds in both systems.</li>
+        <li>Consent from candidates before they're mentioned in outreach.</li>
+      </ul>
+    </section>
+
+    <section id="risks">
+      <h2>Risks to handle before going live</h2>
+      <div class="risk">
+        <h3>Technical: the rules read free text</h3>
+        <p>Remote policy, notes and skills are written by people. Keywords like "licensed" or "unclear local restriction", and exact skill names, will miss things like "must live in Texas" or "QBO" vs "QuickBooks". <b>Fix:</b> a skills synonym list, a phrase list for location and licences, tests built from real postings, and "unclear → ask an employee" kept as the default, so misses fail safe.</p>
+      </div>
+      <div class="risk c">
+        <h3>Commercial: email reputation</h3>
+        <p>The history already shows emails to U.S.-only and unverified companies, and a follow-up to a licensed U.S.-only role. Cold email that ignores eligibility or stop signals gets marked as spam, hurts the sending domain and risks complaints. <b>Fix:</b> a separate warmed-up sending domain, daily volume caps, suppression shared across systems, and today's ⚠ checks made hard gates in the send path.</p>
+      </div>
+    </section>
+
+    <section id="limits">
+      <h2>What's simplified in the prototype</h2>
+      <ul class="bul">
+        <li>Nothing is sent. Drafts are shown only, and the integrations are replaced by CSV files.</li>
+        <li>Decisions and the audit log live in this browser, not a database.</li>
+        <li>The sign-in on App-product.html is a demo gate (admin / admin), not real security.</li>
+        <li>One follow-up schedule for everyone, taken from the history: email 2 three days after email 1.</li>
+        <li>The A/B test is too small to read (about 13 emails each). The dashboard says so.</li>
+        <li>Simulated events in the simulator only affect stop rules. They never change the campaign numbers.</li>
+      </ul>
+    </section>
+  </article>
+</div>
 
 <script src="js/rules.js"></script>
 <script src="js/csv.js"></script>
@@ -41,6 +188,7 @@
 <script src="js/pipeline.js"></script>
 <script src="js/store.js"></script>
 <script src="js/ui.js"></script>
+<script src="js/components.js"></script>
 <script src="js/explainer.js"></script>
 </body>
 </html>

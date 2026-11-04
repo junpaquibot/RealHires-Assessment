@@ -12,8 +12,9 @@ A small, working local prototype. It takes mock job postings, finds employers li
 |---|---|---|---|
 | 1 | **`build-plan.html`** | The big picture: a clickable map of how every part connects (Input → The App → Dashboard → Employee), with the rules each part follows. | Yes. Works if moved anywhere. |
 | 2 | **`App-product.html`** | **The product.** The dashboard the Real Hires team would use: ranked opportunities, leads with verification, campaign funnel, A/B comparison, stop rules. The engine and sample data are built in. | Yes. One file, works offline. |
-| 3 | **`Actual build demo/index.html`** | The same app, split into its components (one JavaScript file each), for walking through how it's built and how each part would be deployed. | Needs its folder. |
-| 4 | **`Actual build demo/explainer.html`** | Explains the Actual build demo, one component at a time: input → rule → output with live numbers, the code behind it, and its production equivalent. | Needs its folder. |
+| 3 | **`Actual build demo/index.html`** | **The same product, from its separate files.** Exactly what `App-product.html` runs, but loading each component from `js/` and the screens from `product/`. `App-product.html` is this page packed into one file. | Needs its folder. |
+| 3b | **`Actual build demo/simulator.html`** | **The component simulator.** Pick any component to see its live result on the data, the settings it reads from `rules.js`, its real source code, and the options for deploying it (with a recommendation). Import CSV and simulated events live here. | Needs its folder. |
+| 4 | **`Actual build demo/explainer.html`** | **The guide.** A plain-language document: how the parts fit together, each step with live numbers, how to run and change it, and how to take it live (stack, architecture, path to production, integrations, risks). | Needs its folder. |
 
 ## Run it
 
@@ -22,18 +23,18 @@ A small, working local prototype. It takes mock job postings, finds employers li
 **Optional extras** (need [Node.js](https://nodejs.org), no packages). Run them from inside `Actual build demo/`:
 
 ```bash
-node tests/engine.test.js      # 27 checks on the agreed outcomes (counts, scores, stops, metrics)
-node tools/build-product.js    # rebuild ../App-product.html after changing js/ or product/
+node tests/engine.test.js      # 28 checks on the agreed outcomes (counts, scores, stops, metrics)
+node tools/build-product.js    # pack index.html into ../App-product.html after changing js/ or product/
 node tools/embed-data.js       # re-embed data/*.csv into js/sample-data.js after editing a CSV
 node tools/serve.js            # optional: serve over http://127.0.0.1:8765 instead of file://
 ```
 
 **Signing in to `App-product.html`:** the demo account **admin / admin** is pre-filled, so just click **Log in**. The Register tab is a sample page and doesn't create accounts. This sign-in is a **demo gate, not security**: it runs in the browser, so anyone can read the credentials in the file. A real version would use server-side accounts, hashed passwords and sessions (see *What real integrations would need*).
 
-`App-product.html` is generated: the build script copies the engine files from `js/` and the UI from `product/` into one file. The product and the demo therefore always give the same numbers. Edit the sources, not the generated file.
+`App-product.html` is generated: the build script takes `Actual build demo/index.html` and replaces each stylesheet and script it loads with that file's contents. The standalone product and the folder version are therefore the same code, and `node tests/engine.test.js` fails if they ever drift apart. Edit the sources, not the generated file.
 
 ### Importing your own CSVs
-In the **Actual build demo** (`index.html`), use **Import CSV…** to replace jobs, candidates or events. `App-product.html` always runs on the built-in sample data. Several files can be selected at once. The file type is detected from the header row.
+In the **simulator** (`Actual build demo/simulator.html`), use **Import CSV…** to replace jobs, candidates or events. The product (`index.html` / `App-product.html`) always runs on the built-in sample data. Several files can be selected at once. The file type is detected from the header row.
 
 - Files must use the same column names as `data/*.csv`. Extra columns are ignored.
 - A file missing required columns, larger than 5 MB, or not a `.csv` is rejected, and the current data is kept.
@@ -60,7 +61,7 @@ data/*.csv ─► sources + csv ─► normalize ─► dedup ─► eligibility
 events.csv ─► campaign (link, stops, ⚠ flags) ─► assignment ─► follow-ups ─► outreach ─► metrics ─► notes
                        (R5)                        (R3.3)        (R6)          (R4)        (R5)      (R7)
                                                                               │
-                                    store (decisions + audit log) ─► app.js / explainer.js ─► UI
+                                    store (decisions + audit log) ─► product.js (index.html) / simulator.js / explainer.js ─► UI
 ```
 
 | Layer | Files | Production equivalent |
@@ -71,7 +72,7 @@ events.csv ─► campaign (link, stops, ⚠ flags) ─► assignment ─► fol
 | Leads logic | `js/dedup.js`, `js/eligibility.js`, `js/matching.js`, `js/scoring.js`, `js/assignment.js` | Backend service (TypeScript); the modules move over almost unchanged |
 | Campaign logic | `js/outreach.js`, `js/campaign.js`, `js/followups.js`, `js/metrics.js` | Apollo sequences + webhooks; a delayed-job queue for follow-ups |
 | Orchestration | `js/pipeline.js`, `js/rules.js`, `js/store.js` | API layer + a settings table + a decisions/audit table |
-| UI | `index.html`, `explainer.html`, `js/app.js`, `js/explainer.js`, `js/ui.js`, `styles.css`; product UI in `product/` | The same UI, behind a login |
+| UI | `index.html` + `product/` (the product), `simulator.html` + `js/simulator.js`, `explainer.html` + `js/explainer.js`, `js/components.js` (shared descriptions), `js/ui.js`, `styles.css` | The same UI, behind a login |
 
 Plain JavaScript loaded with classic `<script>` tags, not modules, so it works from a double-clicked `file://` page with no build step.
 
@@ -98,7 +99,7 @@ Plain JavaScript loaded with classic `<script>` tags, not modules, so it works f
 - **One sequence for everyone**, taken from the history. There are no per-variant timings or send windows (time zones, business days).
 - **Keyword rules** for licences and unclear restrictions. They're explainable, but they'll miss phrasing they don't know (see risks).
 - **The A/B test is too small to read.** About 13 sends per variant. The dashboard says so instead of naming a winner.
-- **Simulated events** (Follow-ups tab) only affect stop rules. They never change the historical campaign numbers.
+- **Simulated events** (simulator → Stop rules & follow-ups) only affect stop rules. They never change the historical campaign numbers.
 
 ## What real integrations would need
 
@@ -139,11 +140,12 @@ RealHires Assessment/
 ├── App-product.html           2 · the product dashboard (standalone, generated)
 ├── README.md
 └── Actual build demo/
-    ├── index.html             3 · component-by-component app
-    ├── explainer.html         4 · explains the demo
-    ├── styles.css             demo styles
+    ├── index.html             3 · the product, from separate files (packed into App-product.html)
+    ├── simulator.html         3b · the component simulator
+    ├── explainer.html         4 · the guide (how it's built, how to take it live)
+    ├── styles.css             simulator + guide styles
     ├── js/                    the engine: one file per component (see "How it works")
-    ├── product/               App-product sources: product.js, product.css, product.template.html
+    ├── product/               product screens: product.js, product.css, product-config.js
     ├── data/                  the original sample CSVs (synthetic)
     ├── test-data/             messy CSVs for trying the import
     ├── tests/engine.test.js   engine checks (node, no dependencies)

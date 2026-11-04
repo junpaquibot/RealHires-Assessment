@@ -49,6 +49,7 @@
   HI.store = {
     init: function () { load(); return run(); },
     snapshot: function () { return snapshot; },
+    texts: function () { return texts; },
     decisions: function () { return decisions; },
     onChange: function (fn) { listeners.push(fn); },
     setCheck: function (lead, value) {

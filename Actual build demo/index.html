@@ -3,31 +3,72 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<!-- The product, built from the separate files in this folder. tools/build-product.js bundles this page into ../App-product.html. -->
 <!-- S4: no network calls. Only this folder's own scripts and styles can load. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file:; style-src 'self' file:; img-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
 <title>HireIntercept</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="product/product.css">
 </head>
 <body>
-<header class="top">
-  <div class="bar-row">
-    <div class="brand">
-      <h1>HireIntercept <span class="muted">· Real Hires prototype</span></h1>
-      <small id="source"></small>
+<!-- Sign-in screen. A demo gate only: it runs in the browser, so it is not real security. -->
+<div class="auth" id="auth">
+  <div class="auth-card">
+    <div class="brand auth-brand"><span class="logo">HI</span>HireIntercept</div>
+    <p class="auth-sub">Real Hires team dashboard</p>
+    <div class="seg auth-tabs" role="tablist">
+      <button id="tab-login" class="on" role="tab" aria-selected="true">Log in</button>
+      <button id="tab-register" role="tab" aria-selected="false">Register</button>
     </div>
-    <div class="actions">
-      <button id="import-btn" title="Import jobs, candidates or events CSV files. The type is detected from the header row.">Import CSV…</button>
-      <input id="import-file" type="file" accept=".csv,text/csv" multiple hidden>
-      <button id="sample-btn" title="Go back to the embedded sample files">Load sample data</button>
-      <button id="reset-btn" title="Clear reviewer decisions, candidate moves and simulated events">Reset decisions</button>
-      <a href="explainer.html">Explainer view →</a>
+
+    <form id="login-form" class="auth-form" autocomplete="off" novalidate>
+      <label>Username<input id="login-user" name="username" value="admin" autocomplete="off" required></label>
+      <label>Password<input id="login-pass" name="password" type="password" value="admin" autocomplete="off" required></label>
+      <div class="auth-msg" id="login-msg" role="alert" hidden></div>
+      <button class="btn primary auth-submit" type="submit">Log in</button>
+      <p class="auth-hint">Demo account is pre-filled: <b>admin</b> / <b>admin</b>.</p>
+    </form>
+
+    <form id="register-form" class="auth-form" autocomplete="off" novalidate hidden>
+      <label>Full name<input id="reg-name" autocomplete="off" required></label>
+      <label>Work email<input id="reg-email" type="email" autocomplete="off" required></label>
+      <label>Username<input id="reg-user" autocomplete="off" required></label>
+      <label>Password<input id="reg-pass" type="password" autocomplete="off" required></label>
+      <label>Confirm password<input id="reg-pass2" type="password" autocomplete="off" required></label>
+      <div class="auth-msg" id="reg-msg" role="alert" hidden></div>
+      <button class="btn primary auth-submit" type="submit">Create account</button>
+      <p class="auth-hint">Sample page. New accounts can't be created in this prototype, so use the demo account to log in.</p>
+    </form>
+  </div>
+  <p class="auth-foot">Prototype · synthetic data · nothing is sent</p>
+</div>
+
+<div id="app" hidden>
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand"><span class="logo">HI</span>HireIntercept <small>Dashboard</small></div>
+    <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+    <div class="top-right">
+      <span class="chip hide-sm">Synthetic data · nothing is sent</span>
+      <div class="menu-wrap">
+        <button class="btn" id="data-btn" aria-haspopup="true">Data ▾</button>
+        <div class="menu" id="data-menu" hidden>
+          <button id="m-notes">Data notes <span class="count" id="notes-count">0</span></button>
+          <hr>
+          <button id="m-reset">Reset employee decisions</button>
+          <hr>
+          <button id="m-logout">Log out <span class="faint" id="who"></span></button>
+        </div>
+      </div>
     </div>
   </div>
-  <nav class="tabs" id="tabs" aria-label="Sections"></nav>
-</header>
+</div>
 <main id="main"><p class="muted">Loading…</p></main>
-<dialog id="lead-dialog" aria-label="Lead details"></dialog>
-
+</div>
+<div class="backdrop" id="backdrop" hidden></div>
+<aside class="drawer" id="drawer" tabindex="-1" aria-label="Lead details" hidden></aside>
+<div class="modal" id="modal" role="dialog" aria-label="Data notes" hidden></div>
+<div class="toast" id="toast" role="status" hidden></div>
 <script src="js/rules.js"></script>
 <script src="js/csv.js"></script>
 <script src="js/sample-data.js"></script>
@@ -44,8 +85,9 @@
 <script src="js/outreach.js"></script>
 <script src="js/quality.js"></script>
 <script src="js/pipeline.js"></script>
+<script src="product/product-config.js"></script>
 <script src="js/store.js"></script>
 <script src="js/ui.js"></script>
-<script src="js/app.js"></script>
+<script src="product/product.js"></script>
 </body>
 </html>

@@ -1,6 +1,7 @@
 /*
- * Builds ../../App-product.html: one standalone file with the engine, the sample data and the product UI.
- * The engine files are the same ones the Actual build demo uses, so both always give the same numbers.
+ * Builds ../App-product.html by packing index.html (the product) into one standalone file.
+ * Every <link rel="stylesheet"> and <script src> in index.html is replaced by the file's contents,
+ * so App-product.html runs exactly the same code as index.html, just without needing the folder.
  * Run with:  node tools/build-product.js   (from inside "Actual build demo")
  */
 "use strict";
@@ -8,23 +9,25 @@ const fs = require("fs");
 const path = require("path");
 const demo = path.join(__dirname, "..");
 const out = path.join(demo, "..", "App-product.html");
-
-const ENGINE = ["rules", "csv", "sample-data", "sources", "normalize", "dedup", "eligibility", "matching", "scoring",
-  "campaign", "assignment", "followups", "metrics", "outreach", "quality", "pipeline"];
-
 const read = (p) => fs.readFileSync(path.join(demo, p), "utf8");
 // Keep inlined code from closing the <script> tag early.
 const safe = (code) => code.replace(/<\/(script)/gi, "<\\/$1").replace(/<!--/g, "<\\!--");
 
-const parts = [];
-parts.push("/* ===== App-product.html: generated file ===== */");
-ENGINE.forEach((f) => parts.push("/* ----- js/" + f + ".js ----- */\n" + read("js/" + f + ".js")));
-parts.push("/* product keeps its own saved decisions, separate from the demo */\n(function (HI) { HI.storeKey = \"hireintercept-product-v1\"; })(this.HI = this.HI || {});");
-["js/store.js", "js/ui.js", "product/product.js"].forEach((f) => parts.push("/* ----- " + f + " ----- */\n" + read(f)));
+let html = read("index.html");
 
-const html = read("product/product.template.html")
-  .replace("/*{{CSS}}*/", () => read("product/product.css"))
-  .replace("/*{{SCRIPTS}}*/", () => safe(parts.join("\n\n")));
+// 1. Stylesheets → inline <style>
+html = html.replace(/<link rel="stylesheet" href="([^"]+)">/g, (_, href) => "<style>\n" + read(href) + "\n</style>");
+
+// 2. All <script src> tags → one inline <script>, in the same order
+const srcs = [];
+html = html.replace(/<script src="([^"]+)"><\/script>\n?/g, (_, src) => { srcs.push(src); return srcs.length === 1 ? "@@SCRIPTS@@\n" : ""; });
+const bundle = srcs.map((s) => "/* ----- " + s + " ----- */\n" + read(s)).join("\n\n");
+html = html.replace("@@SCRIPTS@@", () => "<script>\n/* ===== App-product.html: generated from Actual build demo/index.html. Don't edit by hand. ===== */\n" + safe(bundle) + "\n</script>");
+
+// 3. Inline code needs an inline-friendly security policy (still no network calls)
+html = html.replace(/<meta http-equiv="Content-Security-Policy" content="[^"]*">/,
+  '<meta http-equiv="Content-Security-Policy" content="default-src \'none\'; style-src \'unsafe-inline\'; script-src \'unsafe-inline\'; img-src data:; connect-src \'none\'; form-action \'none\'; base-uri \'none\'">');
+html = html.replace(/<!-- The product, built from[^>]*-->\n/, "<!-- Standalone build of \"Actual build demo/index.html\": the engine, sample data and UI are all inside this one file. -->\n");
 
 fs.writeFileSync(out, html);
-console.log("Wrote " + path.relative(process.cwd(), out) + " (" + Math.round(html.length / 1024) + " KB)");
+console.log("Wrote " + path.relative(process.cwd(), out) + " from index.html (" + srcs.length + " scripts, " + Math.round(html.length / 1024) + " KB)");

@@ -6,7 +6,7 @@
 (function (HI) {
   "use strict";
 
-  var KEY = "hireintercept-decisions-v1";
+  var KEY = HI.storeKey || "hireintercept-decisions-v1"; // App-product.html sets its own key
   var texts = HI.sources.loadSample();
   var decisions = blank();
   var listeners = [];

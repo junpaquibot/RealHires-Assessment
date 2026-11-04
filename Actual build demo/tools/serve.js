@@ -1,13 +1,14 @@
 /*
  * Optional local web server (no dependencies). The app works fine by double-clicking index.html;
- * this is only for previewing over http://localhost.  Run with:  node tools/serve.js  [port]
+ * this is only for previewing over http://localhost.  Run with:  node tools/serve.js  [port] [folder]
  * It serves this folder read-only, binds to 127.0.0.1 only, and refuses paths outside the folder.
  */
 "use strict";
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
-const root = path.resolve(__dirname, "..");
+// Serves "Actual build demo/" by default. Pass a folder as the 2nd argument to serve something else.
+const root = path.resolve(process.argv[3] || path.join(__dirname, ".."));
 const port = Number(process.argv[2]) || 8765;
 const types = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".csv": "text/csv; charset=utf-8", ".md": "text/plain; charset=utf-8", ".txt": "text/plain; charset=utf-8" };
 http.createServer((req, res) => {

@@ -6,48 +6,52 @@ A small, working local prototype. It takes mock job postings, finds employers li
 
 ---
 
+## What's in here
+
+| | File | What it's for | Standalone? |
+|---|---|---|---|
+| 1 | **`build-plan.html`** | The big picture: a clickable map of how every part connects (Input → The App → Dashboard → Employee), with the rules each part follows. | Yes. Works if moved anywhere. |
+| 2 | **`App-product.html`** | **The product.** The dashboard the Real Hires team would use: ranked opportunities, leads with verification, campaign funnel, A/B comparison, stop rules. The engine and sample data are built in. | Yes. One file, works offline. |
+| 3 | **`Actual build demo/index.html`** | The same app, split into its components (one JavaScript file each), for walking through how it's built and how each part would be deployed. | Needs its folder. |
+| 4 | **`Actual build demo/explainer.html`** | Explains the Actual build demo, one component at a time: input → rule → output with live numbers, the code behind it, and its production equivalent. | Needs its folder. |
+
 ## Run it
 
-**No install, no server and no keys are needed.**
+**No install, no server and no keys are needed.** Double-click any of the HTML files above. They open in any modern browser (Chrome, Edge, Firefox or Safari), and the three sample CSVs load automatically.
 
-1. Download or clone this repository.
-2. Double-click **`index.html`**. It opens in any modern browser (Chrome, Edge, Firefox or Safari).
-3. The three sample CSVs load automatically.
-
-| File | What it is |
-|---|---|
-| `index.html` | **App view.** Dashboard, leads, review queue, candidates, drafts, campaign, follow-ups, data notes and audit log. |
-| `explainer.html` | **Explainer view.** The same engine, opened up component by component: input → rule → output with live numbers, the code behind it, and what it becomes in production. |
-| `build-plan.html` | The build-plan presentation: real-app architecture vs. this prototype. |
-
-**Optional extras** (need [Node.js](https://nodejs.org), no packages):
+**Optional extras** (need [Node.js](https://nodejs.org), no packages). Run them from inside `Actual build demo/`:
 
 ```bash
 node tests/engine.test.js      # 27 checks on the agreed outcomes (counts, scores, stops, metrics)
-node tools/serve.js            # serve over http://127.0.0.1:8765 instead of file://
+node tools/build-product.js    # rebuild ../App-product.html after changing js/ or product/
 node tools/embed-data.js       # re-embed data/*.csv into js/sample-data.js after editing a CSV
+node tools/serve.js            # optional: serve over http://127.0.0.1:8765 instead of file://
 ```
 
+**Signing in to `App-product.html`:** the demo account **admin / admin** is pre-filled, so just click **Log in**. The Register tab is a sample page and doesn't create accounts. This sign-in is a **demo gate, not security**: it runs in the browser, so anyone can read the credentials in the file. A real version would use server-side accounts, hashed passwords and sessions (see *What real integrations would need*).
+
+`App-product.html` is generated: the build script copies the engine files from `js/` and the UI from `product/` into one file. The product and the demo therefore always give the same numbers. Edit the sources, not the generated file.
+
 ### Importing your own CSVs
-Use **Import CSV…** to replace jobs, candidates or events. Several files can be selected at once. The file type is detected from the header row.
+In the **Actual build demo** (`index.html`), use **Import CSV…** to replace jobs, candidates or events. `App-product.html` always runs on the built-in sample data. Several files can be selected at once. The file type is detected from the header row.
 
 - Files must use the same column names as `data/*.csv`. Extra columns are ignored.
 - A file missing required columns, larger than 5 MB, or not a `.csv` is rejected, and the current data is kept.
 - Bad rows are skipped or flagged under **Data notes**. They never crash the app.
-- `test-data/` has messy examples to try: whitespace, mixed case, URL-style domains, `$48,000` salaries, unknown policies, missing titles, duplicate IDs, a `<script>` company name, and a file with missing columns.
+- `Actual build demo/test-data/` has messy examples to try: whitespace, mixed case, URL-style domains, `$48,000` salaries, unknown policies, missing titles, duplicate IDs, a `<script>` company name, and a file with missing columns.
 
 ### Inspect before you run
 Every file here is plain text. Open any `.html`, `.js` or `.css` file in Notepad to read it before running.
 
 - **No dependencies, no external scripts, no network calls.** A Content-Security-Policy tag in each HTML file blocks outgoing connections, even if the code tried.
 - **Imported data is only ever displayed as text, never as HTML.** A company name like `<script>…` is shown as characters, not run. The test files include one to prove it.
-- Reviewer decisions are saved in your browser's local storage only. **Reset decisions** clears them.
+- Employee decisions are saved in your browser's local storage only. The product and the demo keep separate copies. **Reset decisions** clears them.
 
 ---
 
 ## How it works
 
-One pure function, `pipeline.run(csvText, reviewerDecisions)`, runs every step and returns a snapshot. Both views render that snapshot, so their numbers always match. Every weight, keyword and schedule lives in **`js/rules.js`**.
+One pure function, `pipeline.run(csvText, employeeDecisions)`, runs every step and returns a snapshot. This is the rules engine. The product, the demo and the explainer all render that same snapshot, so their numbers always match. Every weight, keyword and schedule lives in **`Actual build demo/js/rules.js`**. Paths below are inside `Actual build demo/`.
 
 ```
 data/*.csv ─► sources + csv ─► normalize ─► dedup ─► eligibility ─► matching ─► scoring
@@ -67,7 +71,7 @@ events.csv ─► campaign (link, stops, ⚠ flags) ─► assignment ─► fol
 | Leads logic | `js/dedup.js`, `js/eligibility.js`, `js/matching.js`, `js/scoring.js`, `js/assignment.js` | Backend service (TypeScript); the modules move over almost unchanged |
 | Campaign logic | `js/outreach.js`, `js/campaign.js`, `js/followups.js`, `js/metrics.js` | Apollo sequences + webhooks; a delayed-job queue for follow-ups |
 | Orchestration | `js/pipeline.js`, `js/rules.js`, `js/store.js` | API layer + a settings table + a decisions/audit table |
-| UI | `index.html`, `explainer.html`, `js/app.js`, `js/explainer.js`, `js/ui.js`, `styles.css` | The same UI, behind a login |
+| UI | `index.html`, `explainer.html`, `js/app.js`, `js/explainer.js`, `js/ui.js`, `styles.css`; product UI in `product/` | The same UI, behind a login |
 
 Plain JavaScript loaded with classic `<script>` tags, not modules, so it works from a double-clicked `file://` page with no build step.
 
@@ -130,13 +134,18 @@ The history already shows sends to U.S.-only and unverified leads, and a follow-
 ## Project structure
 
 ```
-index.html            app view
-explainer.html        explainer view
-build-plan.html       presentation
-styles.css            shared styles (light + dark)
-js/                   one file per component (see "How it works")
-data/                 the original sample CSVs (synthetic)
-test-data/            messy CSVs for trying the import
-tests/engine.test.js  engine checks (node, no dependencies)
-tools/                embed-data.js (CSV → js/sample-data.js), serve.js (optional local server)
+RealHires Assessment/
+├── build-plan.html            1 · the map (standalone)
+├── App-product.html           2 · the product dashboard (standalone, generated)
+├── README.md
+└── Actual build demo/
+    ├── index.html             3 · component-by-component app
+    ├── explainer.html         4 · explains the demo
+    ├── styles.css             demo styles
+    ├── js/                    the engine: one file per component (see "How it works")
+    ├── product/               App-product sources: product.js, product.css, product.template.html
+    ├── data/                  the original sample CSVs (synthetic)
+    ├── test-data/             messy CSVs for trying the import
+    ├── tests/engine.test.js   engine checks (node, no dependencies)
+    └── tools/                 build-product.js, embed-data.js, serve.js
 ```

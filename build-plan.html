@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HireIntercept Build Plan</title>
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1b1c1f; --muted: #5f6368; --line: #8a8f98;
+    --panel: #f7f8fa; --panel-s: #e2e5ea;
+    --box: #ffffff; --box-s: #c6cbd3;
+    --ext: #e8f0fe; --ext-s: #6f98dc;
+    --core: #f3e8ff; --core-s: #8b5cf6;
+    --db: #fff4dc; --db-s: #d99a1e;
+    --ui: #e6f6ea; --ui-s: #3c9a5a;
+    --stub-s: #8a8f98;
+    --accent: #6d4ae0; --pill: #eef0f4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #16171a; --fg: #ececec; --muted: #a3a7ae; --line: #8a8f98;
+      --panel: #1d1f23; --panel-s: #2f3238;
+      --box: #23252a; --box-s: #464a52;
+      --ext: #1c2a44; --ext-s: #5b84c9;
+      --core: #2c2140; --core-s: #a98bf7;
+      --db: #3a2f17; --db-s: #e3ae45;
+      --ui: #1b3324; --ui-s: #5cbf7c;
+      --accent: #a98bf7; --pill: #26282d;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #16171a; --fg: #ececec; --muted: #a3a7ae; --line: #8a8f98;
+    --panel: #1d1f23; --panel-s: #2f3238;
+    --box: #23252a; --box-s: #464a52;
+    --ext: #1c2a44; --ext-s: #5b84c9;
+    --core: #2c2140; --core-s: #a98bf7;
+    --db: #3a2f17; --db-s: #e3ae45;
+    --ui: #1b3324; --ui-s: #5cbf7c;
+    --accent: #a98bf7; --pill: #26282d;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg);
+         font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  nav { position: sticky; top: 0; z-index: 5; background: var(--bg);
+        border-bottom: 1px solid var(--panel-s); }
+  nav .in { max-width: 1100px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 8px;
+            flex-wrap: wrap; align-items: center; }
+  nav b { margin-right: 8px; font-size: 15px; }
+  nav a { text-decoration: none; color: var(--fg); background: var(--pill); padding: 4px 12px;
+          border-radius: 999px; font-size: 13.5px; border: 1px solid transparent; }
+  nav a.on { border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  main { max-width: 1100px; margin: 0 auto; padding: 0 16px 80px; }
+  section { padding: 48px 0 24px; border-bottom: 1px solid var(--panel-s); scroll-margin-top: 56px; }
+  .kicker { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  h1 { font-size: 30px; line-height: 1.2; margin: 6px 0 10px; }
+  h2 { font-size: 26px; line-height: 1.25; margin: 6px 0 10px; }
+  h3 { font-size: 17px; margin: 0 0 6px; }
+  .lead { font-size: 18px; color: var(--muted); max-width: 780px; margin: 0 0 24px; }
+  .wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--panel-s); border-radius: 14px; padding: 16px; }
+  svg { width: 100%; min-width: 760px; height: auto; display: block; }
+  svg text { fill: var(--fg); font-family: inherit; }
+  .t { font-size: 13px; font-weight: 600; text-anchor: middle; }
+  .s { font-size: 11px; fill: var(--muted); text-anchor: middle; }
+  .h { font-size: 12px; font-weight: 700; fill: var(--muted); letter-spacing: .04em; }
+  .bx { fill: var(--box); stroke: var(--box-s); stroke-width: 1.2; }
+  .ext { fill: var(--ext); stroke: var(--ext-s); stroke-width: 1.2; }
+  .core { fill: var(--core); stroke: var(--core-s); stroke-width: 1.2; }
+  .db { fill: var(--db); stroke: var(--db-s); stroke-width: 1.2; }
+  .ui { fill: var(--ui); stroke: var(--ui-s); stroke-width: 1.2; }
+  .area { fill: none; stroke: var(--box-s); stroke-width: 1.4; }
+  .stub { fill: none; stroke: var(--stub-s); stroke-width: 1.2; stroke-dasharray: 5 4; }
+  .a { stroke: var(--line); stroke-width: 1.4; fill: none; marker-end: url(#arr); }
+  .a2 { stroke: var(--line); stroke-width: 1.4; fill: none; marker-end: url(#arr); marker-start: url(#arr); }
+  .lbl { font-size: 10.5px; fill: var(--muted); }
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 20px; }
+  .card { background: var(--panel); border: 1px solid var(--panel-s); border-radius: 12px; padding: 16px; }
+  .card p { margin: 0; color: var(--muted); font-size: 14.5px; }
+  .card ul { margin: 8px 0 0; padding-left: 18px; font-size: 14.5px; }
+  .card.pick { border-color: var(--accent); }
+  .tag { display: inline-block; font-size: 12px; font-weight: 700; color: var(--accent);
+         border: 1px solid var(--accent); border-radius: 999px; padding: 0 8px; margin-left: 6px; vertical-align: 2px; }
+  .vs { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; margin-top: 8px; }
+  @media (max-width: 720px) { .vs { grid-template-columns: 1fr; } h1 { font-size: 25px; } h2 { font-size: 22px; } }
+  .quote { border-left: 4px solid var(--accent); padding: 6px 0 6px 14px; margin: 18px 0; font-size: 17px; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  .tw { overflow-x: auto; }
+  td, th { border-bottom: 1px solid var(--panel-s); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; }
+  td:first-child { font-weight: 700; white-space: nowrap; }
+  code { font-size: 13px; background: var(--pill); padding: 1px 5px; border-radius: 4px; }
+  ol.steps { padding-left: 20px; } ol.steps li { margin: 6px 0; }
+  .hint { font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+</style>
+</head>
+<body>
+<nav><div class="in">
+  <b>HireIntercept · Build plan</b>
+  <a href="#real">1 · Real app</a>
+  <a href="#proto">2 · Prototype choice</a>
+  <a href="#covers">3 · Requirements</a>
+  <a href="#views">4 · Two views</a>
+  <a href="#prod">5 · Going live</a>
+</div></nav>
+
+<main>
+
+<!-- 1 -->
+<section id="real">
+  <div class="kicker">Step 1 · If this were an actual app</div>
+  <h1>These would be its individual components</h1>
+  <p class="lead">A hosted web app with a backend. Real data comes in from Apollo, Finally Staff and the email provider. Rules run on the server, and a scheduler sends follow-ups only after checking the stop rules.</p>
+
+  <div class="wrap">
+  <svg viewBox="0 0 1000 520" role="img" aria-label="Production architecture: external services feed a backend service with database, which serves a web app">
+    <defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" fill="#8a8f98"/>
+      </marker>
+    </defs>
+
+    <!-- CI/CD -->
+    <rect class="bx" x="230" y="8" width="540" height="40" rx="8"/>
+    <text class="t" x="500" y="27">CI/CD pipeline</text>
+    <text class="s" x="500" y="41">automated tests → build → deploy to cloud</text>
+    <path class="a" d="M500 48 V66"/>
+
+    <!-- External -->
+    <text class="h" x="20" y="82">EXTERNAL SERVICES</text>
+    <rect class="ext" x="20" y="90" width="180" height="70" rx="10"/>
+    <text class="t" x="110" y="118">Apollo</text><text class="s" x="110" y="136">companies · contacts</text><text class="s" x="110" y="150">job signals</text>
+    <rect class="ext" x="20" y="180" width="180" height="70" rx="10"/>
+    <text class="t" x="110" y="208">Finally Staff</text><text class="s" x="110" y="226">candidate profiles</text><text class="s" x="110" y="240">(assumed source)</text>
+    <rect class="ext" x="20" y="270" width="180" height="70" rx="10"/>
+    <text class="t" x="110" y="298">Email provider</text><text class="s" x="110" y="316">sends mail · pushes</text><text class="s" x="110" y="330">delivery/reply events</text>
+
+    <!-- Backend -->
+    <rect class="area" x="230" y="68" width="540" height="342" rx="14"/>
+    <text class="h" x="246" y="88">BACKEND SERVICE (CLOUD)</text>
+
+    <rect class="core" x="250" y="100" width="160" height="56" rx="8"/>
+    <text class="t" x="330" y="122">Connectors</text><text class="s" x="330" y="140">scheduled sync, retries</text>
+    <rect class="core" x="420" y="100" width="160" height="56" rx="8"/>
+    <text class="t" x="500" y="122">Normalize + dedup</text><text class="s" x="500" y="140">clean, link duplicates</text>
+    <rect class="core" x="590" y="100" width="160" height="56" rx="8"/>
+    <text class="t" x="670" y="122">Rules engine</text><text class="s" x="670" y="140">eligibility · match · score</text>
+
+    <rect class="core" x="250" y="180" width="160" height="56" rx="8"/>
+    <text class="t" x="330" y="202">Webhook intake</text><text class="s" x="330" y="220">delivered · replied · bounced</text>
+    <rect class="core" x="420" y="180" width="160" height="56" rx="8"/>
+    <text class="t" x="500" y="202">Suppression list</text><text class="s" x="500" y="220">reply · bounce · unsubscribe</text>
+    <rect class="core" x="590" y="180" width="160" height="56" rx="8"/>
+    <text class="t" x="670" y="202">Outreach</text><text class="s" x="670" y="220">drafts + A/B assignment</text>
+
+    <rect class="core" x="250" y="340" width="160" height="56" rx="8"/>
+    <text class="t" x="330" y="362">Scheduler / queue</text><text class="s" x="330" y="380">follow-ups on day +3, +7</text>
+    <rect class="core" x="420" y="340" width="160" height="56" rx="8"/>
+    <text class="t" x="500" y="362">Audit log</text><text class="s" x="500" y="380">every decision + reason</text>
+    <rect class="core" x="590" y="340" width="160" height="56" rx="8"/>
+    <text class="t" x="670" y="362">API + login</text><text class="s" x="670" y="380">serves the web app</text>
+
+    <path class="a" d="M410 128 H418"/><path class="a" d="M580 128 H588"/>
+    <path class="a" d="M670 156 V178"/>
+    <path class="a" d="M410 208 H418"/>
+    <path class="a" d="M670 236 V262 H330 V338"/>
+    <text class="lbl" x="540" y="256">queue first email + follow-ups</text>
+    <path class="a" d="M470 236 L400 338"/>
+    <text class="lbl" x="420" y="300">stop-check before</text>
+    <text class="lbl" x="420" y="313">every send</text>
+
+    <path class="a" d="M200 125 H248"/>
+    <path class="a" d="M200 215 Q228 215 248 146"/>
+    <path class="a" d="M200 290 L248 222"/>
+    <path class="a" d="M250 372 Q212 372 202 338"/>
+    <text class="lbl" x="204" y="394">sends</text>
+
+    <!-- Web app -->
+    <text class="h" x="800" y="82">WHAT PEOPLE USE</text>
+    <rect class="ui" x="800" y="90" width="180" height="150" rx="10"/>
+    <text class="t" x="890" y="116">Web app (installable)</text>
+    <text class="s" x="890" y="140">dashboard + ranked leads</text>
+    <text class="s" x="890" y="158">"Verify" review queue</text>
+    <text class="s" x="890" y="176">approve drafts before send</text>
+    <text class="s" x="890" y="194">A/B results</text>
+    <text class="s" x="890" y="222">laptop or phone browser</text>
+    <rect class="ui" x="800" y="270" width="180" height="70" rx="10"/>
+    <text class="t" x="890" y="298">Sales + recruiting team</text><text class="s" x="890" y="316">logs in, reviews, decides</text>
+    <path class="a" d="M750 368 H784 V165 H798"/>
+    <!-- DB -->
+    <rect class="db" x="230" y="440" width="540" height="60" rx="10"/>
+    <text class="t" x="500" y="465">Database</text>
+    <text class="s" x="500" y="483">leads · candidates · events · suppressions · audit trail</text>
+    <path class="a2" d="M500 412 V438"/>
+  </svg>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="proto">
+  <div class="kicker">Step 2 · But this is a 5-hour prototype</div>
+  <h2>So it's a local app that runs on any computer</h2>
+  <div class="quote">"I'm keeping the same components, but running them all in the browser. It opens with a double-click, needs no install or keys, and still ticks off every requirement."</div>
+
+  <div class="wrap">
+  <svg viewBox="0 0 1000 300" role="img" aria-label="Prototype architecture: everything runs inside index.html in the browser, with stubs in place of real services">
+    <rect class="area" x="10" y="10" width="980" height="280" rx="14"/>
+    <text class="h" x="28" y="34">YOUR BROWSER · index.html (double-click, no install, works offline)</text>
+
+    <rect class="ext" x="30" y="60" width="160" height="80" rx="10"/>
+    <text class="t" x="110" y="88">Sample data</text><text class="s" x="110" y="106">3 CSVs load on open</text><text class="s" x="110" y="124">+ Import to replace</text>
+    <rect class="core" x="215" y="60" width="130" height="80" rx="10"/>
+    <text class="t" x="280" y="96">Normalize</text><text class="s" x="280" y="114">clean + flag</text>
+    <rect class="core" x="370" y="60" width="260" height="80" rx="10"/>
+    <text class="t" x="500" y="86">Pipeline modules</text>
+    <text class="s" x="500" y="106">dedup · eligibility · matching · scoring · outreach</text>
+    <text class="s" x="500" y="124">events · stop rules · follow-ups · metrics · audit</text>
+    <rect class="core" x="655" y="60" width="130" height="80" rx="10"/>
+    <text class="t" x="720" y="96">Snapshot</text><text class="s" x="720" y="114">results in memory</text>
+    <rect class="ui" x="810" y="60" width="160" height="80" rx="10"/>
+    <text class="t" x="890" y="92">Two views</text><text class="s" x="890" y="110">App · Explainer</text>
+    <path class="a" d="M190 100 H213"/><path class="a" d="M345 100 H368"/><path class="a" d="M630 100 H653"/><path class="a" d="M785 100 H808"/>
+
+    <rect class="db" x="370" y="160" width="260" height="40" rx="8"/>
+    <text class="t" x="500" y="178">rules.js</text><text class="s" x="500" y="193">weights · thresholds · schedule</text>
+    <path class="a" d="M500 160 V142"/>
+
+    <rect class="stub" x="30" y="225" width="290" height="48" rx="8"/>
+    <text class="t" x="175" y="245">Apollo + Finally Staff → stubbed</text><text class="s" x="175" y="262">sample CSVs stand in for their APIs</text>
+    <rect class="stub" x="355" y="225" width="290" height="48" rx="8"/>
+    <text class="t" x="500" y="245">Email sender → stubbed</text><text class="s" x="500" y="262">Outbox shows "would send"; nothing is sent</text>
+    <rect class="stub" x="680" y="225" width="290" height="48" rx="8"/>
+    <text class="t" x="825" y="245">Database → memory + Export</text><text class="s" x="825" y="262">rebuilt on each import; download CSV/JSON</text>
+  </svg>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h3>Runs anywhere</h3><p>Only needs a web browser. No Python, no Node, no command line on the reviewer's machine.</p></div>
+    <div class="card"><h3>Same components</h3><p>One file per component, matching the real-app boxes above. Moving to a server later is a relocation, not a rewrite.</p></div>
+    <div class="card"><h3>Safe by design</h3><p>Synthetic data only. No live email, scraping, paid keys or real Apollo records, as the brief requires.</p></div>
+    <div class="card"><h3>Easy to demo</h3><p>Opens offline from the repo, or from a free static host for a shareable demo URL.</p></div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="covers">
+  <div class="kicker">Step 3 · Every requirement is covered</div>
+  <h2>What the prototype ticks off</h2>
+  <div class="tw">
+  <table>
+    <tr><th>Req</th><th>What the brief asks</th><th>How the prototype does it</th><th>Component</th></tr>
+    <tr><td>R1</td><td>Import, normalize, dedup; mark ineligible; flag unclear</td><td>Duplicates linked by domain + role and shown side by side. Each job labelled Eligible, Verify or Ineligible, with the rule that fired.</td><td><code>normalize</code> <code>dedup</code> <code>eligibility</code></td></tr>
+    <tr><td>R2</td><td>Explainable 0–100 score, sortable</td><td>Every point in the score has a written reason. Repost count is treated as a signal, never as proof of hiring trouble.</td><td><code>scoring</code></td></tr>
+    <tr><td>R3</td><td>Honest candidate matching</td><td>Matched skills and missing skills both listed. Availability and U.S. hours respected. Labelled synthetic.</td><td><code>matching</code></td></tr>
+    <tr><td>R4</td><td>Two truthful first-contact emails</td><td>A (candidate-first) only when a verified match exists; B (speed-first) always. No invented candidates. Nothing is sent.</td><td><code>outreach</code></td></tr>
+    <tr><td>R5</td><td>Campaign numbers by variant and overall</td><td>Sent, delivered, unique opens (≈), bounces, positive replies, meetings, wins. Duplicate opens counted once.</td><td><code>events</code> <code>metrics</code></td></tr>
+    <tr><td>R6</td><td>Stop rules with a follow-up schedule</td><td>A reply, bounce or unsubscribe cancels every pending follow-up for that company. The schedule shows which steps were cancelled and why.</td><td><code>stops</code> <code>followups</code></td></tr>
+    <tr><td>R7</td><td>Readable dashboard</td><td>Industry and role filters, ranked leads, funnel and A/B comparison. ⚠ warnings where the event history broke the rules.</td><td><code>audit</code> + UI</td></tr>
+  </table>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="views">
+  <div class="kicker">Step 4 · Two ways to look at it</div>
+  <h2>The app, and the app explained</h2>
+  <p class="lead">Both views run the same code on the same data, so the numbers always match.</p>
+  <div class="vs">
+    <div class="card">
+      <h3>App view <span class="tag">index.html</span></h3>
+      <p>The end product, as a user would see it. Final numbers and decisions, no internals, easy to absorb.</p>
+      <ul>
+        <li>Ranked opportunities with filters</li>
+        <li>Candidate suggestions and email drafts</li>
+        <li>Campaign funnel and A/B comparison</li>
+        <li>Stop-rule outcomes and ⚠ warnings</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Explainer view <span class="tag">explainer.html</span></h3>
+      <p>The same app, opened up part by part, for walking a reviewer through it.</p>
+      <ul>
+        <li>What each component does and why</li>
+        <li>Input → rule → output, with the real data</li>
+        <li>The function behind it and what it connects to</li>
+        <li>What it becomes on a real server</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="prod">
+  <div class="kicker">Step 5 · If we took it live</div>
+  <h2>The most effective way to build the real thing</h2>
+  <div class="grid">
+    <div class="card pick">
+      <h3>TypeScript full-stack <span class="tag">Recommended</span></h3>
+      <p>Node backend, Postgres, the same UI. The prototype's JavaScript modules move to the server nearly as-is, and one language covers backend, frontend and integrations.</p>
+    </div>
+    <div class="card">
+      <h3>Python backend</h3>
+      <p>FastAPI + Postgres with a separate web frontend. A strong choice if scoring later becomes data-science heavy, but the rules would be rewritten from JavaScript and the team works in two languages.</p>
+    </div>
+    <div class="card">
+      <h3>Low-code automation</h3>
+      <p>Workflow tools plus a spreadsheet-style database. The fastest to stand up, but stop rules, deduplication and audit trails are hard to test and easy to break as volume grows.</p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:28px">Path to production</h3>
+  <ol class="steps">
+    <li><b>Backend + database:</b> move the modules server-side; store leads, events, suppressions and the audit trail in Postgres.</li>
+    <li><b>Real connectors:</b> replace the CSV sources with Apollo and Finally Staff adapters that keep the same output shape. API keys live only on the server.</li>
+    <li><b>Sending + events:</b> send through Apollo sequences or an email provider; receive delivered/opened/replied/bounced events by webhook instead of CSV.</li>
+    <li><b>Scheduler:</b> run follow-ups on a queue that re-checks the suppression list immediately before every send.</li>
+    <li><b>People in the loop:</b> login, a review queue for "Verify" jobs, and draft approval before anything goes out.</li>
+    <li><b>CI/CD + monitoring:</b> automated tests on every change, then deploy as an installable web app that works on laptop and phone.</li>
+  </ol>
+  <p class="hint">Tip for presenting: use the ← → arrow keys to move between steps.</p>
+</section>
+
+</main>
+
+<script>
+  (function () {
+    var ids = ["real", "proto", "covers", "views", "prod"];
+    var links = document.querySelectorAll("nav a");
+    function current() {
+      var y = window.scrollY + 90, cur = 0;
+      ids.forEach(function (id, i) { if (document.getElementById(id).offsetTop <= y) cur = i; });
+      return cur;
+    }
+    function mark() {
+      var c = current();
+      links.forEach(function (a, i) { a.classList.toggle("on", i === c); });
+    }
+    window.addEventListener("scroll", mark, { passive: true });
+    mark();
+    document.addEventListener("keydown", function (e) {
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+      var c = current() + (e.key === "ArrowRight" ? 1 : -1);
+      c = Math.max(0, Math.min(ids.length - 1, c));
+      document.getElementById(ids[c]).scrollIntoView({ behavior: "smooth" });
+      e.preventDefault();
+    });
+  })();
+</script>
+</body>
+</html>

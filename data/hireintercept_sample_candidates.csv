@@ -1,0 +1,11 @@
+candidate_id,role_specialty,skills,us_hours_available,available_now
+C-001,Bookkeeper,QuickBooks;reconciliation;Excel,yes,yes
+C-002,Maintenance Coordinator,vendor coordination;work orders;customer service,yes,yes
+C-003,Client Intake Specialist,phone support;CRM;English,yes,yes
+C-004,Accounts Payable Specialist,accounts payable;Excel;ERP,yes,yes
+C-005,Customer Support Representative,support tickets;CRM;English,yes,no
+C-006,Executive Assistant,calendar management;Google Workspace;English,yes,yes
+C-007,Medical Billing Coordinator,medical billing;claims;HIPAA awareness,yes,yes
+C-008,Sales Operations Assistant,CRM;reports;Excel,yes,yes
+C-009,Bookkeeper,QuickBooks;Excel,no,yes
+C-010,Client Intake Specialist,phone support;English,yes,yes

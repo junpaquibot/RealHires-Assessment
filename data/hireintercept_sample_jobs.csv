@@ -1,0 +1,31 @@
+posting_id,company,domain,industry,company_employees,title,required_skills,remote_policy,us_hours_required,posted_days_ago,repost_count,salary_usd_per_year,notes
+JOB-001,Cedar Ridge Services,cedarridgeservices.example,Accounting,18,Bookkeeper,QuickBooks;reconciliation;Excel,GLOBAL,unknown,2,0,45000,new vacancy
+JOB-002,Northline Property Co,northlinepropertyco.example,Property Management,35,Maintenance Coordinator,vendor coordination;work orders;customer service,GLOBAL,yes,4,0,52000,urgent start
+JOB-003,Beacon Ledger Group,beaconledgergroup.example,Legal Services,75,Client Intake Specialist,phone support;CRM;English,US_ONLY,yes,9,1,61000,prior recruiter inquiry
+JOB-004,Harborwell Advisors,harborwelladvisors.example,Accounting,120,Accounts Payable Specialist,accounts payable;Excel;ERP,GLOBAL,unknown,14,2,70000,hiring manager listed
+JOB-005,Oakline Legal Group,oaklinelegalgroup.example,E-commerce,210,Customer Support Representative,support tickets;CRM;English,REMOTE_UNSPECIFIED,yes,28,0,82000,role reposted
+JOB-006,Pinecrest Retail,pinecrestretail.example,Professional Services,42,Executive Assistant,calendar management;Google Workspace;English,GLOBAL,yes,39,3,45000,unclear local restriction
+JOB-007,Summit Operations,summitoperations.example,Healthcare Administration,90,Medical Billing Coordinator,medical billing;claims;HIPAA awareness,US_ONLY,unknown,2,0,52000,new vacancy
+JOB-008,Seabrook Finance,seabrookfinance.example,Business Services,28,Sales Operations Assistant,CRM;reports;Excel,GLOBAL,yes,4,0,61000,urgent start
+JOB-009,Marigold Management,marigoldmanagement.example,Healthcare,160,Licensed Registered Nurse,licensed nursing;patient care,US_ONLY,yes,9,1,70000,prior recruiter inquiry
+JOB-010,Metroline Logistics,metrolinelogistics.example,Logistics,55,Warehouse Supervisor,warehouse operations;onsite management,ONSITE,unknown,14,2,82000,hiring manager listed
+JOB-011,Westlake Solutions,westlakesolutions.example,Accounting,18,Bookkeeper,QuickBooks;reconciliation;Excel,GLOBAL,yes,28,0,45000,role reposted
+JOB-012,Brightwater Services,brightwaterservices.example,Property Management,35,Maintenance Coordinator,vendor coordination;work orders;customer service,GLOBAL,yes,39,3,52000,unclear local restriction
+JOB-013,Orchard Point Holdings,orchardpointholdings.example,Legal Services,75,Client Intake Specialist,phone support;CRM;English,US_ONLY,unknown,2,0,61000,new vacancy
+JOB-014,Goldleaf Consulting,goldleafconsulting.example,Accounting,120,Accounts Payable Specialist,accounts payable;Excel;ERP,GLOBAL,yes,4,0,70000,urgent start
+JOB-015,Lighthouse Commerce,lighthousecommerce.example,E-commerce,210,Customer Support Representative,support tickets;CRM;English,REMOTE_UNSPECIFIED,yes,9,1,82000,prior recruiter inquiry
+JOB-016,Blue Mesa Partners,bluemesapartners.example,Professional Services,42,Executive Assistant,calendar management;Google Workspace;English,GLOBAL,unknown,14,2,45000,hiring manager listed
+JOB-017,Meridian Client Services,meridianclientservices.example,Healthcare Administration,90,Medical Billing Coordinator,medical billing;claims;HIPAA awareness,US_ONLY,yes,28,0,52000,role reposted
+JOB-018,Whitecap Accounting,whitecapaccounting.example,Business Services,28,Sales Operations Assistant,CRM;reports;Excel,GLOBAL,yes,39,3,61000,unclear local restriction
+JOB-019,Greenpath Ventures,greenpathventures.example,Healthcare,160,Licensed Registered Nurse,licensed nursing;patient care,US_ONLY,unknown,2,0,70000,new vacancy
+JOB-020,Stonebridge Operations,stonebridgeoperations.example,Logistics,55,Warehouse Supervisor,warehouse operations;onsite management,ONSITE,yes,4,0,82000,urgent start
+JOB-021,Highland Professional Group,highlandprofessionalgroup.example,Accounting,18,Bookkeeper,QuickBooks;reconciliation;Excel,GLOBAL,yes,9,1,45000,prior recruiter inquiry
+JOB-022,Clearhaven Residential,clearhavenresidential.example,Property Management,35,Maintenance Coordinator,vendor coordination;work orders;customer service,GLOBAL,unknown,14,2,52000,hiring manager listed
+JOB-023,Aspen Grove Commerce,aspengrovecommerce.example,Legal Services,75,Client Intake Specialist,phone support;CRM;English,US_ONLY,yes,28,0,61000,role reposted
+JOB-024,Silverstrand Services,silverstrandservices.example,Accounting,120,Accounts Payable Specialist,accounts payable;Excel;ERP,GLOBAL,yes,39,3,70000,unclear local restriction
+JOB-025,Maple Peak Group,maplepeakgroup.example,E-commerce,210,Customer Support Representative,support tickets;CRM;English,REMOTE_UNSPECIFIED,unknown,2,0,82000,new vacancy
+JOB-026,Brookfield Office Co,brookfieldofficeco.example,Professional Services,42,Executive Assistant,calendar management;Google Workspace;English,GLOBAL,yes,4,0,45000,urgent start
+JOB-027,Eastbank Support,eastbanksupport.example,Healthcare Administration,90,Medical Billing Coordinator,medical billing;claims;HIPAA awareness,US_ONLY,yes,9,1,52000,prior recruiter inquiry
+JOB-028,Redwood Growth Partners,redwoodgrowthpartners.example,Business Services,28,Sales Operations Assistant,CRM;reports;Excel,GLOBAL,unknown,14,2,61000,hiring manager listed
+JOB-029,Northline Property Co,northlinepropertyco.example,Property Management,160,Maintenance Coordinator,vendor coordination;work orders;customer service,GLOBAL,yes,28,0,70000,role reposted
+JOB-030,Harborwell Advisors,harborwelladvisors.example,Accounting,55,Accounts Payable Specialist,accounts payable;Excel;ERP,REMOTE_UNSPECIFIED,yes,39,3,82000,unclear local restriction

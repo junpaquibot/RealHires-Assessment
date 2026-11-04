@@ -3,346 +3,512 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<!-- Standalone page: everything is inside this file. It loads nothing and connects to nothing. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:">
 <title>HireIntercept Build Plan</title>
 <style>
   :root {
-    --bg: #ffffff; --fg: #1b1c1f; --muted: #5f6368; --line: #8a8f98;
-    --panel: #f7f8fa; --panel-s: #e2e5ea;
-    --box: #ffffff; --box-s: #c6cbd3;
-    --ext: #e8f0fe; --ext-s: #6f98dc;
-    --core: #f3e8ff; --core-s: #8b5cf6;
-    --db: #fff4dc; --db-s: #d99a1e;
-    --ui: #e6f6ea; --ui-s: #3c9a5a;
-    --stub-s: #8a8f98;
-    --accent: #6d4ae0; --pill: #eef0f4;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #16171a; --fg: #ececec; --muted: #a3a7ae; --line: #8a8f98;
-      --panel: #1d1f23; --panel-s: #2f3238;
-      --box: #23252a; --box-s: #464a52;
-      --ext: #1c2a44; --ext-s: #5b84c9;
-      --core: #2c2140; --core-s: #a98bf7;
-      --db: #3a2f17; --db-s: #e3ae45;
-      --ui: #1b3324; --ui-s: #5cbf7c;
-      --accent: #a98bf7; --pill: #26282d;
-    }
-  }
-  :root[data-theme="dark"] {
-    --bg: #16171a; --fg: #ececec; --muted: #a3a7ae; --line: #8a8f98;
-    --panel: #1d1f23; --panel-s: #2f3238;
-    --box: #23252a; --box-s: #464a52;
-    --ext: #1c2a44; --ext-s: #5b84c9;
-    --core: #2c2140; --core-s: #a98bf7;
-    --db: #3a2f17; --db-s: #e3ae45;
-    --ui: #1b3324; --ui-s: #5cbf7c;
-    --accent: #a98bf7; --pill: #26282d;
+    --bg: #f3f4f7; --card: #ffffff; --fg: #14161a; --text: #2b2f36; --muted: #5d6470; --faint: #868d99;
+    --border: #e2e5eb; --line: #a5abb6; --accent: #5b3fd6; --accent-soft: #f2eeff;
+    --in: #2f6fd0; --step: #5b3fd6; --gate: #d0473c; --emp: #c7870a; --dash: #1f8a55;
+    --shadow-sm: 0 1px 2px rgba(20, 22, 26, .05), 0 1px 1px rgba(20, 22, 26, .03);
+    --shadow: 0 14px 36px rgba(20, 22, 26, .16);
+    --font: "Segoe UI Variable Text", "Segoe UI", Inter, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-display: "Segoe UI Variable Display", "Segoe UI", Inter, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Arial, sans-serif;
   }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--fg);
-         font: 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
-  nav { position: sticky; top: 0; z-index: 5; background: var(--bg);
-        border-bottom: 1px solid var(--panel-s); }
-  nav .in { max-width: 1100px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 8px;
-            flex-wrap: wrap; align-items: center; }
-  nav b { margin-right: 8px; font-size: 15px; }
-  nav a { text-decoration: none; color: var(--fg); background: var(--pill); padding: 4px 12px;
-          border-radius: 999px; font-size: 13.5px; border: 1px solid transparent; }
-  nav a.on { border-color: var(--accent); color: var(--accent); font-weight: 600; }
-  main { max-width: 1100px; margin: 0 auto; padding: 0 16px 80px; }
-  section { padding: 48px 0 24px; border-bottom: 1px solid var(--panel-s); scroll-margin-top: 56px; }
-  .kicker { font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
-  h1 { font-size: 30px; line-height: 1.2; margin: 6px 0 10px; }
-  h2 { font-size: 26px; line-height: 1.25; margin: 6px 0 10px; }
-  h3 { font-size: 17px; margin: 0 0 6px; }
-  .lead { font-size: 18px; color: var(--muted); max-width: 780px; margin: 0 0 24px; }
-  .wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--panel-s); border-radius: 14px; padding: 16px; }
-  svg { width: 100%; min-width: 760px; height: auto; display: block; }
-  svg text { fill: var(--fg); font-family: inherit; }
-  .t { font-size: 13px; font-weight: 600; text-anchor: middle; }
-  .s { font-size: 11px; fill: var(--muted); text-anchor: middle; }
-  .h { font-size: 12px; font-weight: 700; fill: var(--muted); letter-spacing: .04em; }
-  .bx { fill: var(--box); stroke: var(--box-s); stroke-width: 1.2; }
-  .ext { fill: var(--ext); stroke: var(--ext-s); stroke-width: 1.2; }
-  .core { fill: var(--core); stroke: var(--core-s); stroke-width: 1.2; }
-  .db { fill: var(--db); stroke: var(--db-s); stroke-width: 1.2; }
-  .ui { fill: var(--ui); stroke: var(--ui-s); stroke-width: 1.2; }
-  .area { fill: none; stroke: var(--box-s); stroke-width: 1.4; }
-  .stub { fill: none; stroke: var(--stub-s); stroke-width: 1.2; stroke-dasharray: 5 4; }
-  .a { stroke: var(--line); stroke-width: 1.4; fill: none; marker-end: url(#arr); }
-  .a2 { stroke: var(--line); stroke-width: 1.4; fill: none; marker-end: url(#arr); marker-start: url(#arr); }
-  .lbl { font-size: 10.5px; fill: var(--muted); }
-  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 20px; }
-  .card { background: var(--panel); border: 1px solid var(--panel-s); border-radius: 12px; padding: 16px; }
-  .card p { margin: 0; color: var(--muted); font-size: 14.5px; }
-  .card ul { margin: 8px 0 0; padding-left: 18px; font-size: 14.5px; }
-  .card.pick { border-color: var(--accent); }
-  .tag { display: inline-block; font-size: 12px; font-weight: 700; color: var(--accent);
-         border: 1px solid var(--accent); border-radius: 999px; padding: 0 8px; margin-left: 6px; vertical-align: 2px; }
-  .vs { display: grid; gap: 14px; grid-template-columns: 1fr 1fr; margin-top: 8px; }
-  @media (max-width: 720px) { .vs { grid-template-columns: 1fr; } h1 { font-size: 25px; } h2 { font-size: 22px; } }
-  .quote { border-left: 4px solid var(--accent); padding: 6px 0 6px 14px; margin: 18px 0; font-size: 17px; }
-  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
-  .tw { overflow-x: auto; }
-  td, th { border-bottom: 1px solid var(--panel-s); padding: 8px 10px; text-align: left; vertical-align: top; }
-  th { color: var(--muted); font-weight: 600; font-size: 13px; }
-  td:first-child { font-weight: 700; white-space: nowrap; }
-  code { font-size: 13px; background: var(--pill); padding: 1px 5px; border-radius: 4px; }
-  ol.steps { padding-left: 20px; } ol.steps li { margin: 6px 0; }
-  .hint { font-size: 12.5px; color: var(--muted); margin-top: 10px; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15.5px/1.6 var(--font); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  h1, h2, h3 { font-family: var(--font-display); color: var(--fg); }
+  header { max-width: 1520px; margin: 0 auto; padding: 34px 28px 4px; }
+  .kicker { font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+  h1 { font-size: 32px; line-height: 1.15; margin: 8px 0 10px; font-weight: 700; letter-spacing: -.015em; }
+  .lead { color: var(--muted); max-width: 860px; margin: 0; font-size: 17px; line-height: 1.55; }
+
+  .layout { max-width: 1520px; margin: 0 auto; padding: 22px 28px 40px; display: grid; grid-template-columns: minmax(0, 1fr) 370px; gap: 22px; align-items: start; }
+  .map-card { background: var(--card); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-sm); min-width: 0; overflow: hidden; }
+  .map-top { display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; justify-content: space-between; padding: 12px 16px 12px 20px; border-bottom: 1px solid var(--border); }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .legend i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+  .zoom { display: inline-flex; align-items: center; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: #fff; }
+  .zoom button { font: 600 14px/1 var(--font); color: var(--text); background: none; border: 0; padding: 8px 12px; cursor: pointer; min-width: 36px; }
+  .zoom button:hover { background: var(--bg); }
+  .zoom button + button, .zoom output + button, .zoom button + output { border-left: 1px solid var(--border); }
+  .zoom output { font-size: 12.5px; color: var(--muted); padding: 0 10px; min-width: 52px; text-align: center; font-variant-numeric: tabular-nums; }
+  .zoom .fit { font-weight: 600; font-size: 13px; }
+  .tip { font-size: 12.5px; color: var(--faint); padding: 8px 20px 0; }
+
+  .map-scroll { overflow: auto; max-height: 82vh; }
+  .map-inner { position: relative; padding: 12px 14px 16px; margin: 0 auto; }
+  svg { display: block; width: 100%; height: auto; }
+  svg text { font-family: var(--font); }
+
+  /* map regions */
+  .region-input { fill: #f6f8fc; stroke: var(--border); }
+  .region-app { fill: #fbfaff; stroke: #dcd4fb; stroke-width: 1.5; }
+  .region-engine { fill: #ffffff; stroke: var(--border); }
+  .region-label { font-family: var(--font-display); font-size: 14px; font-weight: 800; letter-spacing: .1em; fill: var(--fg); }
+  .region-sub { font-size: 12.5px; fill: var(--muted); }
+  .sub-label { font-size: 11.5px; font-weight: 700; letter-spacing: .09em; fill: var(--faint); }
+  .sub-note { font-size: 12px; fill: var(--faint); }
+
+  .edge { fill: none; stroke: var(--line); stroke-width: 1.5; }
+  .edge.back { stroke-dasharray: 5 4; }
+  .edge-label { font-size: 12px; fill: var(--muted); paint-order: stroke; stroke: #ffffff; stroke-width: 5px; stroke-linejoin: round; }
+
+  /* nodes */
+  .node { cursor: pointer; outline: none; }
+  .node .card { fill: #ffffff; stroke: var(--border); stroke-width: 1.2; transition: stroke .12s; }
+  .node .t { font-family: var(--font-display); font-size: 15px; font-weight: 600; fill: var(--fg); }
+  .node .s { font-size: 12.5px; fill: var(--muted); }
+  .node:hover .card, .node:focus-visible .card { stroke: var(--accent); }
+  .node.on .card { stroke: var(--accent); stroke-width: 2.4; }
+  .node.dash-frame .card { fill: #f3fbf6; stroke: #bfe3cd; stroke-width: 1.5; }
+  .node.dash-frame:hover .card, .node.dash-frame:focus-visible .card { stroke: var(--dash); }
+  .node.dash-frame.on .card { stroke: var(--dash); stroke-width: 2.4; }
+  .node.dash-frame .t { font-size: 16px; }
+
+  /* bubble */
+  .bubble { position: absolute; z-index: 3; width: 320px; background: #ffffff; color: var(--text); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 16px 18px 14px; }
+  .bubble[hidden] { display: none; }
+  .bubble .type { font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+  .bubble h3 { margin: 3px 0 8px; font-size: 18px; font-weight: 650; padding-right: 26px; }
+  .bubble p { margin: 0 0 9px; font-size: 15px; line-height: 1.55; }
+  .bubble .how { color: var(--muted); font-size: 14px; }
+  .bubble .x { position: absolute; top: 10px; right: 10px; width: 28px; height: 28px; border: 0; background: none; color: var(--faint); font-size: 18px; border-radius: 8px; cursor: pointer; }
+  .bubble .x:hover { background: var(--bg); color: var(--fg); }
+  .bubble .more { font-size: 12.5px; color: var(--accent); font-weight: 600; }
+
+  /* side panel */
+  aside { position: sticky; top: 18px; background: var(--card); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow-sm); padding: 24px 24px 26px; max-height: calc(100vh - 36px); overflow: auto; }
+  aside h2 { font-size: 22px; font-weight: 700; margin: 8px 0 2px; letter-spacing: -.01em; line-height: 1.25; }
+  aside h4 { font-size: 11.5px; letter-spacing: .09em; text-transform: uppercase; color: var(--faint); margin: 22px 0 8px; font-weight: 700; }
+  aside p { margin: 0 0 8px; }
+  .type-pill { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; padding: 3px 11px 3px 9px; border-radius: 999px; background: var(--bg); }
+  .type-pill i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+  .where { color: var(--muted); font-size: 13.5px; }
+  .io { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .io div { background: var(--bg); border-radius: 10px; padding: 10px 12px; font-size: 14px; line-height: 1.45; }
+  .io b { display: block; font-size: 11px; color: var(--faint); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 3px; }
+  ul.rules { list-style: none; padding: 0; margin: 0; }
+  ul.rules li { position: relative; padding: 9px 0 9px 22px; border-top: 1px solid var(--border); font-size: 14.5px; line-height: 1.5; }
+  ul.rules li:first-child { border-top: 0; padding-top: 2px; }
+  ul.rules li::before { content: ""; position: absolute; left: 3px; top: 17px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); opacity: .65; }
+  ul.rules li:first-child::before { top: 10px; }
+  .req { display: inline-block; font-size: 11px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 5px; padding: 0 6px; margin-left: 6px; vertical-align: 1px; }
+  .example { background: var(--accent-soft); border-radius: 10px; padding: 11px 13px; font-size: 14px; line-height: 1.5; }
+  .steps-list { margin: 10px 0 0; padding: 0; list-style: none; counter-reset: s; }
+  .steps-list li { position: relative; padding: 7px 0 7px 36px; counter-increment: s; }
+  .steps-list li::before { content: counter(s); position: absolute; left: 0; top: 8px; width: 23px; height: 23px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 700; display: grid; place-items: center; }
+  .steps-list b { color: var(--fg); }
+  .steps-list .muted { font-size: 14px; }
+  .muted { color: var(--muted); }
+  footer { max-width: 1520px; margin: 0 auto; padding: 0 28px 34px; color: var(--faint); font-size: 13px; }
+
+  @media (max-width: 1060px) {
+    .layout { grid-template-columns: 1fr; }
+    aside { position: static; max-height: none; }
+  }
+  @media (max-width: 640px) {
+    header { padding: 22px 16px 4px; }
+    h1 { font-size: 25px; }
+    .lead { font-size: 16px; }
+    .layout { padding: 14px 16px 30px; }
+    footer { padding: 0 16px 24px; }
+    .bubble { width: 280px; }
+    .map-top { padding: 10px 12px; }
+  }
 </style>
 </head>
 <body>
-<nav><div class="in">
-  <b>HireIntercept · Build plan</b>
-  <a href="#real">1 · Real app</a>
-  <a href="#proto">2 · Prototype choice</a>
-  <a href="#covers">3 · Requirements</a>
-  <a href="#views">4 · Two views</a>
-  <a href="#prod">5 · Going live</a>
-</div></nav>
+<header>
+  <div class="kicker">HireIntercept · build plan</div>
+  <h1>How the pieces connect</h1>
+  <p class="lead">Three files go in. The app works out which employers we can actually help, matches a real candidate where one exists, runs careful A/B outreach, and shows it all on one dashboard the Real Hires team uses.</p>
+</header>
 
-<main>
-
-<!-- 1 -->
-<section id="real">
-  <div class="kicker">Step 1 · If this were an actual app</div>
-  <h1>These would be its individual components</h1>
-  <p class="lead">A hosted web app with a backend. Real data comes in from Apollo, Finally Staff and the email provider. Rules run on the server, and a scheduler sends follow-ups only after checking the stop rules.</p>
-
-  <div class="wrap">
-  <svg viewBox="0 0 1000 520" role="img" aria-label="Production architecture: external services feed a backend service with database, which serves a web app">
-    <defs>
-      <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-        <path d="M0,0 L10,5 L0,10 z" fill="#8a8f98"/>
-      </marker>
-    </defs>
-
-    <!-- CI/CD -->
-    <rect class="bx" x="230" y="8" width="540" height="40" rx="8"/>
-    <text class="t" x="500" y="27">CI/CD pipeline</text>
-    <text class="s" x="500" y="41">automated tests → build → deploy to cloud</text>
-    <path class="a" d="M500 48 V66"/>
-
-    <!-- External -->
-    <text class="h" x="20" y="82">EXTERNAL SERVICES</text>
-    <rect class="ext" x="20" y="90" width="180" height="70" rx="10"/>
-    <text class="t" x="110" y="118">Apollo</text><text class="s" x="110" y="136">companies · contacts</text><text class="s" x="110" y="150">job signals</text>
-    <rect class="ext" x="20" y="180" width="180" height="70" rx="10"/>
-    <text class="t" x="110" y="208">Finally Staff</text><text class="s" x="110" y="226">candidate profiles</text><text class="s" x="110" y="240">(assumed source)</text>
-    <rect class="ext" x="20" y="270" width="180" height="70" rx="10"/>
-    <text class="t" x="110" y="298">Email provider</text><text class="s" x="110" y="316">sends mail · pushes</text><text class="s" x="110" y="330">delivery/reply events</text>
-
-    <!-- Backend -->
-    <rect class="area" x="230" y="68" width="540" height="342" rx="14"/>
-    <text class="h" x="246" y="88">BACKEND SERVICE (CLOUD)</text>
-
-    <rect class="core" x="250" y="100" width="160" height="56" rx="8"/>
-    <text class="t" x="330" y="122">Connectors</text><text class="s" x="330" y="140">scheduled sync, retries</text>
-    <rect class="core" x="420" y="100" width="160" height="56" rx="8"/>
-    <text class="t" x="500" y="122">Normalize + dedup</text><text class="s" x="500" y="140">clean, link duplicates</text>
-    <rect class="core" x="590" y="100" width="160" height="56" rx="8"/>
-    <text class="t" x="670" y="122">Rules engine</text><text class="s" x="670" y="140">eligibility · match · score</text>
-
-    <rect class="core" x="250" y="180" width="160" height="56" rx="8"/>
-    <text class="t" x="330" y="202">Webhook intake</text><text class="s" x="330" y="220">delivered · replied · bounced</text>
-    <rect class="core" x="420" y="180" width="160" height="56" rx="8"/>
-    <text class="t" x="500" y="202">Suppression list</text><text class="s" x="500" y="220">reply · bounce · unsubscribe</text>
-    <rect class="core" x="590" y="180" width="160" height="56" rx="8"/>
-    <text class="t" x="670" y="202">Outreach</text><text class="s" x="670" y="220">drafts + A/B assignment</text>
-
-    <rect class="core" x="250" y="340" width="160" height="56" rx="8"/>
-    <text class="t" x="330" y="362">Scheduler / queue</text><text class="s" x="330" y="380">follow-ups on day +3, +7</text>
-    <rect class="core" x="420" y="340" width="160" height="56" rx="8"/>
-    <text class="t" x="500" y="362">Audit log</text><text class="s" x="500" y="380">every decision + reason</text>
-    <rect class="core" x="590" y="340" width="160" height="56" rx="8"/>
-    <text class="t" x="670" y="362">API + login</text><text class="s" x="670" y="380">serves the web app</text>
-
-    <path class="a" d="M410 128 H418"/><path class="a" d="M580 128 H588"/>
-    <path class="a" d="M670 156 V178"/>
-    <path class="a" d="M410 208 H418"/>
-    <path class="a" d="M670 236 V262 H330 V338"/>
-    <text class="lbl" x="540" y="256">queue first email + follow-ups</text>
-    <path class="a" d="M470 236 L400 338"/>
-    <text class="lbl" x="420" y="300">stop-check before</text>
-    <text class="lbl" x="420" y="313">every send</text>
-
-    <path class="a" d="M200 125 H248"/>
-    <path class="a" d="M200 215 Q228 215 248 146"/>
-    <path class="a" d="M200 290 L248 222"/>
-    <path class="a" d="M250 372 Q212 372 202 338"/>
-    <text class="lbl" x="204" y="394">sends</text>
-
-    <!-- Web app -->
-    <text class="h" x="800" y="82">WHAT PEOPLE USE</text>
-    <rect class="ui" x="800" y="90" width="180" height="150" rx="10"/>
-    <text class="t" x="890" y="116">Web app (installable)</text>
-    <text class="s" x="890" y="140">dashboard + ranked leads</text>
-    <text class="s" x="890" y="158">"Verify" review queue</text>
-    <text class="s" x="890" y="176">approve drafts before send</text>
-    <text class="s" x="890" y="194">A/B results</text>
-    <text class="s" x="890" y="222">laptop or phone browser</text>
-    <rect class="ui" x="800" y="270" width="180" height="70" rx="10"/>
-    <text class="t" x="890" y="298">Sales + recruiting team</text><text class="s" x="890" y="316">logs in, reviews, decides</text>
-    <path class="a" d="M750 368 H784 V165 H798"/>
-    <!-- DB -->
-    <rect class="db" x="230" y="440" width="540" height="60" rx="10"/>
-    <text class="t" x="500" y="465">Database</text>
-    <text class="s" x="500" y="483">leads · candidates · events · suppressions · audit trail</text>
-    <path class="a2" d="M500 412 V438"/>
-  </svg>
-  </div>
-</section>
-
-<!-- 2 -->
-<section id="proto">
-  <div class="kicker">Step 2 · But this is a 5-hour prototype</div>
-  <h2>So it's a local app that runs on any computer</h2>
-  <div class="quote">"I'm keeping the same components, but running them all in the browser. It opens with a double-click, needs no install or keys, and still ticks off every requirement."</div>
-
-  <div class="wrap">
-  <svg viewBox="0 0 1000 300" role="img" aria-label="Prototype architecture: everything runs inside index.html in the browser, with stubs in place of real services">
-    <rect class="area" x="10" y="10" width="980" height="280" rx="14"/>
-    <text class="h" x="28" y="34">YOUR BROWSER · index.html (double-click, no install, works offline)</text>
-
-    <rect class="ext" x="30" y="60" width="160" height="80" rx="10"/>
-    <text class="t" x="110" y="88">Sample data</text><text class="s" x="110" y="106">3 CSVs load on open</text><text class="s" x="110" y="124">+ Import to replace</text>
-    <rect class="core" x="215" y="60" width="130" height="80" rx="10"/>
-    <text class="t" x="280" y="96">Normalize</text><text class="s" x="280" y="114">clean + flag</text>
-    <rect class="core" x="370" y="60" width="260" height="80" rx="10"/>
-    <text class="t" x="500" y="86">Pipeline modules</text>
-    <text class="s" x="500" y="106">dedup · eligibility · matching · scoring · outreach</text>
-    <text class="s" x="500" y="124">events · stop rules · follow-ups · metrics · audit</text>
-    <rect class="core" x="655" y="60" width="130" height="80" rx="10"/>
-    <text class="t" x="720" y="96">Snapshot</text><text class="s" x="720" y="114">results in memory</text>
-    <rect class="ui" x="810" y="60" width="160" height="80" rx="10"/>
-    <text class="t" x="890" y="92">Two views</text><text class="s" x="890" y="110">App · Explainer</text>
-    <path class="a" d="M190 100 H213"/><path class="a" d="M345 100 H368"/><path class="a" d="M630 100 H653"/><path class="a" d="M785 100 H808"/>
-
-    <rect class="db" x="370" y="160" width="260" height="40" rx="8"/>
-    <text class="t" x="500" y="178">rules.js</text><text class="s" x="500" y="193">weights · thresholds · schedule</text>
-    <path class="a" d="M500 160 V142"/>
-
-    <rect class="stub" x="30" y="225" width="290" height="48" rx="8"/>
-    <text class="t" x="175" y="245">Apollo + Finally Staff → stubbed</text><text class="s" x="175" y="262">sample CSVs stand in for their APIs</text>
-    <rect class="stub" x="355" y="225" width="290" height="48" rx="8"/>
-    <text class="t" x="500" y="245">Email sender → stubbed</text><text class="s" x="500" y="262">Outbox shows "would send"; nothing is sent</text>
-    <rect class="stub" x="680" y="225" width="290" height="48" rx="8"/>
-    <text class="t" x="825" y="245">Database → memory + Export</text><text class="s" x="825" y="262">rebuilt on each import; download CSV/JSON</text>
-  </svg>
-  </div>
-
-  <div class="grid">
-    <div class="card"><h3>Runs anywhere</h3><p>Only needs a web browser. No Python, no Node, no command line on the reviewer's machine.</p></div>
-    <div class="card"><h3>Same components</h3><p>One file per component, matching the real-app boxes above. Moving to a server later is a relocation, not a rewrite.</p></div>
-    <div class="card"><h3>Safe by design</h3><p>Synthetic data only. No live email, scraping, paid keys or real Apollo records, as the brief requires.</p></div>
-    <div class="card"><h3>Easy to demo</h3><p>Opens offline from the repo, or from a free static host for a shareable demo URL.</p></div>
-  </div>
-</section>
-
-<!-- 3 -->
-<section id="covers">
-  <div class="kicker">Step 3 · Every requirement is covered</div>
-  <h2>What the prototype ticks off</h2>
-  <div class="tw">
-  <table>
-    <tr><th>Req</th><th>What the brief asks</th><th>How the prototype does it</th><th>Component</th></tr>
-    <tr><td>R1</td><td>Import, normalize, dedup; mark ineligible; flag unclear</td><td>Duplicates linked by domain + role and shown side by side. Each job labelled Eligible, Verify or Ineligible, with the rule that fired.</td><td><code>normalize</code> <code>dedup</code> <code>eligibility</code></td></tr>
-    <tr><td>R2</td><td>Explainable 0–100 score, sortable</td><td>Every point in the score has a written reason. Repost count is treated as a signal, never as proof of hiring trouble.</td><td><code>scoring</code></td></tr>
-    <tr><td>R3</td><td>Honest candidate matching</td><td>Matched skills and missing skills both listed. Availability and U.S. hours respected. Labelled synthetic.</td><td><code>matching</code></td></tr>
-    <tr><td>R4</td><td>Two truthful first-contact emails</td><td>A (candidate-first) only when a verified match exists; B (speed-first) always. No invented candidates. Nothing is sent.</td><td><code>outreach</code></td></tr>
-    <tr><td>R5</td><td>Campaign numbers by variant and overall</td><td>Sent, delivered, unique opens (≈), bounces, positive replies, meetings, wins. Duplicate opens counted once.</td><td><code>events</code> <code>metrics</code></td></tr>
-    <tr><td>R6</td><td>Stop rules with a follow-up schedule</td><td>A reply, bounce or unsubscribe cancels every pending follow-up for that company. The schedule shows which steps were cancelled and why.</td><td><code>stops</code> <code>followups</code></td></tr>
-    <tr><td>R7</td><td>Readable dashboard</td><td>Industry and role filters, ranked leads, funnel and A/B comparison. ⚠ warnings where the event history broke the rules.</td><td><code>audit</code> + UI</td></tr>
-  </table>
-  </div>
-</section>
-
-<!-- 4 -->
-<section id="views">
-  <div class="kicker">Step 4 · Two ways to look at it</div>
-  <h2>The app, and the app explained</h2>
-  <p class="lead">Both views run the same code on the same data, so the numbers always match.</p>
-  <div class="vs">
-    <div class="card">
-      <h3>App view <span class="tag">index.html</span></h3>
-      <p>The end product, as a user would see it. Final numbers and decisions, no internals, easy to absorb.</p>
-      <ul>
-        <li>Ranked opportunities with filters</li>
-        <li>Candidate suggestions and email drafts</li>
-        <li>Campaign funnel and A/B comparison</li>
-        <li>Stop-rule outcomes and ⚠ warnings</li>
-      </ul>
+<div class="layout">
+  <section class="map-card" aria-label="System map">
+    <div class="map-top">
+      <div class="legend" aria-label="Legend">
+        <span><i style="background:var(--in)"></i>Input</span>
+        <span><i style="background:var(--step)"></i>Processing</span>
+        <span><i style="background:var(--gate)"></i>Safety check</span>
+        <span><i style="background:var(--dash)"></i>Dashboard</span>
+        <span><i style="background:var(--emp)"></i>Employee</span>
+      </div>
+      <div class="zoom" role="group" aria-label="Zoom">
+        <button id="zoom-out" title="Zoom out" aria-label="Zoom out">−</button>
+        <output id="zoom-level" aria-live="polite">100%</output>
+        <button id="zoom-in" title="Zoom in" aria-label="Zoom in">+</button>
+        <button id="zoom-fit" class="fit" title="Fit the whole diagram">Fit</button>
+      </div>
     </div>
-    <div class="card">
-      <h3>Explainer view <span class="tag">explainer.html</span></h3>
-      <p>The same app, opened up part by part, for walking a reviewer through it.</p>
-      <ul>
-        <li>What each component does and why</li>
-        <li>Input → rule → output, with the real data</li>
-        <li>The function behind it and what it connects to</li>
-        <li>What it becomes on a real server</li>
-      </ul>
+    <div class="tip">Click any box to see what it does. Zoom with the buttons, or Ctrl + scroll over the diagram.</div>
+    <div class="map-scroll" id="map-scroll">
+      <div class="map-inner" id="map-inner">
+        <svg id="map" viewBox="0 0 1280 690" role="group" aria-label="HireIntercept: input, the app's processing and dashboard, and the employee who uses it"></svg>
+        <div class="bubble" id="bubble" role="dialog" aria-live="polite" hidden>
+          <button class="x" id="bubble-x" aria-label="Close">×</button>
+          <div class="type" id="bubble-type"></div>
+          <h3 id="bubble-title"></h3>
+          <p id="bubble-what"></p>
+          <p class="how" id="bubble-how"></p>
+          <span class="more">The rules it follows are in the panel.</span>
+        </div>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- 5 -->
-<section id="prod">
-  <div class="kicker">Step 5 · If we took it live</div>
-  <h2>The most effective way to build the real thing</h2>
-  <div class="grid">
-    <div class="card pick">
-      <h3>TypeScript full-stack <span class="tag">Recommended</span></h3>
-      <p>Node backend, Postgres, the same UI. The prototype's JavaScript modules move to the server nearly as-is, and one language covers backend, frontend and integrations.</p>
-    </div>
-    <div class="card">
-      <h3>Python backend</h3>
-      <p>FastAPI + Postgres with a separate web frontend. A strong choice if scoring later becomes data-science heavy, but the rules would be rewritten from JavaScript and the team works in two languages.</p>
-    </div>
-    <div class="card">
-      <h3>Low-code automation</h3>
-      <p>Workflow tools plus a spreadsheet-style database. The fastest to stand up, but stop rules, deduplication and audit trails are hard to test and easy to break as volume grows.</p>
-    </div>
-  </div>
+  <aside id="panel" aria-live="polite"></aside>
+</div>
 
-  <h3 style="margin-top:28px">Path to production</h3>
-  <ol class="steps">
-    <li><b>Backend + database:</b> move the modules server-side; store leads, events, suppressions and the audit trail in Postgres.</li>
-    <li><b>Real connectors:</b> replace the CSV sources with Apollo and Finally Staff adapters that keep the same output shape. API keys live only on the server.</li>
-    <li><b>Sending + events:</b> send through Apollo sequences or an email provider; receive delivered/opened/replied/bounced events by webhook instead of CSV.</li>
-    <li><b>Scheduler:</b> run follow-ups on a queue that re-checks the suppression list immediately before every send.</li>
-    <li><b>People in the loop:</b> login, a review queue for "Verify" jobs, and draft approval before anything goes out.</li>
-    <li><b>CI/CD + monitoring:</b> automated tests on every change, then deploy as an installable web app that works on laptop and phone.</li>
-  </ol>
-  <p class="hint">Tip for presenting: use the ← → arrow keys to move between steps.</p>
-</section>
-
-</main>
+<footer>Prototype plan · all data is synthetic · nothing is ever sent, scraped or called.</footer>
 
 <script>
-  (function () {
-    var ids = ["real", "proto", "covers", "views", "prod"];
-    var links = document.querySelectorAll("nav a");
-    function current() {
-      var y = window.scrollY + 90, cur = 0;
-      ids.forEach(function (id, i) { if (document.getElementById(id).offsetTop <= y) cur = i; });
-      return cur;
+(function () {
+  "use strict";
+
+  var TYPES = {
+    in:   { label: "Input",        color: "var(--in)",   where: "Input" },
+    step: { label: "Processing",   color: "var(--step)", where: "The App · processing (rules engine)" },
+    gate: { label: "Safety check", color: "var(--gate)", where: "The App · processing (rules engine)" },
+    dash: { label: "Dashboard",    color: "var(--dash)", where: "The App · dashboard (front-end)" },
+    emp:  { label: "Employee",     color: "var(--emp)",  where: "Uses the dashboard" }
+  };
+
+  // Each rule: [text, main requirement or null]
+  var NODES = [
+    // ---------- Input ----------
+    { id: "jobs", type: "in", x: 24, y: 144, w: 200, h: 56, title: "Job postings", sub: "who is hiring",
+      what: "The open jobs we start from: company, role, required skills, remote policy, and how recently it was posted.",
+      how: "In the prototype: a CSV file. In production: Apollo or a job feed, synced on a schedule.",
+      takes: "Job CSV", gives: "Raw job postings",
+      rules: [["Synthetic data only. These employers are never contacted.", null], ["A new file can be imported if it has the same columns.", "R1"]],
+      example: "30 job postings." },
+    { id: "candidates", type: "in", x: 24, y: 216, w: 200, h: 56, title: "Candidates", sub: "who we can offer",
+      what: "Our remote candidates: skills, whether they're available now, and whether they can work U.S. hours.",
+      how: "In the prototype: a CSV file. In production: Finally Staff.",
+      takes: "Candidate CSV", gives: "Candidate profiles",
+      rules: [["Never described as available unless available_now = yes.", "R3"], ["Never described as able to work U.S. hours unless us_hours_available = yes.", "R3"], ["Always labelled as synthetic.", "R3"]],
+      example: "10 candidates. C-005 isn't available now." },
+    { id: "history", type: "in", x: 24, y: 412, w: 200, h: 56, title: "Campaign events", sub: "emails already sent",
+      what: "Mock campaign activity: sends, deliveries, opens, replies, bounces, unsubscribes, meetings and a client win.",
+      how: "Treated as history: reported exactly as recorded. Anything that broke our rules gets a ⚠.",
+      takes: "Events CSV", gives: "Past email events",
+      rules: [["Never rewritten.", "R5"], ["Past emails that break today's rules are counted and marked ⚠.", "R5"], ["A contact = the company (its domain). The data has no contact names.", "R5"]],
+      example: "80 events. 18 of the 26 sends would break today's rules." },
+
+    // ---------- The App · processing ----------
+    { id: "normalize", type: "step", x: 284, y: 140, w: 216, h: 64, title: "Normalize & deduplicate", sub: "by domain + role",
+      what: "Normalize: tidy the values (spacing, capitals, domains, skill lists). Deduplicate: merge repeat postings by the same company for the same role.",
+      how: "Same domain + same role = one lead. The most recent posting is the record; the others stay linked.",
+      takes: "Job postings", gives: "Unique leads",
+      rules: [["The most recent posting is the record, unless the repeats disagree.", "R1"], ["If repeats disagree on remote policy, U.S. hours, skills or title, an employee decides.", "R1"], ["Other differences (salary, company size) are shown, not used.", "R1"], ["Unknown values are flagged, never guessed.", "R1"]],
+      example: "30 postings → 28 leads. Northline's repeats agree and merge. Harborwell's disagree, so an employee decides." },
+    { id: "elig", type: "step", x: 529, y: 140, w: 216, h: 64, title: "Eligibility check", sub: "can it be filled overseas?",
+      what: "Marks each lead eligible or ineligible for overseas placement. Anything unclear goes to an employee for human verification.",
+      how: "Reads the remote policy, notes and title against a short list of rules.",
+      takes: "Unique leads", gives: "Eligible · needs verification · ineligible",
+      rules: [["U.S.-only or on-site → ineligible.", "R1"], ["Licensed locally required (e.g. nurse) → ineligible.", "R1"], ["Remote policy not stated, or \"unclear local restriction\" → human verification.", "R1"], ["Leads waiting for verification get no emails or follow-ups.", "R1"], ["Ineligible leads are kept, but never scored or contacted.", "R2"]],
+      example: "10 eligible · 8 need verification · 10 ineligible." },
+    { id: "match", type: "step", x: 774, y: 140, w: 216, h: 64, title: "Candidate matching", sub: "skills, availability, hours",
+      what: "Matches the job's required skills against each candidate, and shows the evidence and the gaps.",
+      how: "A verified match has every skill, is available now, and can work U.S. hours if the job needs it. Anything less is a partial match.",
+      takes: "Eligible leads + candidates", gives: "Verified and partial matches",
+      rules: [["Verified = all skills + available now + U.S. hours if required.", "R3"], ["Partial = at least one skill. The gaps are always listed.", "R3"], ["One candidate per company at a time. A company that replied yes keeps theirs; otherwise the highest score goes first.", "R3"]],
+      example: "Goldleaf needs accounts payable, Excel and ERP. C-004 has all three, is available and works U.S. hours: verified." },
+    { id: "score", type: "step", x: 1019, y: 140, w: 216, h: 64, title: "Priority scoring", sub: "0–100, explained",
+      what: "Scores each lead 0–100 so the team knows who to contact first. Every point has a reason.",
+      how: "Three parts: remote eligibility (30) + candidate fit (40) + urgency or repeat-posting signals (30).",
+      takes: "Leads + matches", gives: "Scores with reasons",
+      rules: [["Eligibility: clear = 30, waiting for verification = 10.", "R2"], ["Fit: verified = 40. Partial = 30 × share of skills matched.", "R2"], ["Urgency: \"urgent\" +10 · posted ≤ 7 days +10 (≤ 21 days +5) · reposted +10.", "R2"], ["Reposting \"may indicate ongoing need\". Never called proof.", "R2"], ["Salary and company size aren't scored.", "R2"]],
+      example: "Northline: 30 + 40 + 30 = 100." },
+    { id: "outbound", type: "step", x: 284, y: 330, w: 216, h: 64, title: "Outbound variants", sub: "A and B first emails",
+      what: "Writes two short, truthful first-contact emails per eligible lead. A: candidate-first. B: hiring-process / speed-first.",
+      how: "Comparing how A and B perform shows which offer works better.",
+      takes: "Ranked eligible leads", gives: "Email drafts A and B",
+      rules: [["A only when a verified candidate is assigned. Never invent a candidate.", "R4"], ["Under 120 words, one ask (a 15-minute call), an opt-out line.", "R4"], ["Only claims the data supports. Unknowns stay as [placeholders].", "R4"], ["Nothing is actually sent.", "R4"]],
+      example: "Brookfield's A names candidate C-006. Blue Mesa gets B only, because C-006 is offered to Brookfield." },
+    { id: "suppression", type: "gate", x: 529, y: 330, w: 216, h: 64, title: "Suppression check", sub: "right before every send",
+      what: "The last check before any email goes out. If the company replied, bounced or unsubscribed, or the lead isn't eligible, the email is stopped.",
+      how: "It looks at the company's latest events at the moment of sending, not when the email was planned.",
+      takes: "An email about to go", gives: "Send, or stop with a reason",
+      rules: [["Checked right before every send.", "R6"], ["Ineligible → cancelled. Waiting for verification → paused.", "R6"], ["In the prototype nothing is sent; it shows what would happen.", "R6"]],
+      example: "Seabrook Finance bounced, so its next email is stopped." },
+    { id: "tracking", type: "step", x: 774, y: 330, w: 216, h: 64, title: "Campaign tracking", sub: "by variant and overall",
+      what: "Counts messages sent, delivered, unique opens, bounces, positive replies, booked meetings and clients won, for A, B and overall.",
+      how: "Adds up each email's events. Repeat opens of the same email count once.",
+      takes: "Campaign events", gives: "Funnel numbers",
+      rules: [["Duplicate opens don't inflate unique opens.", "R5"], ["Open rate is marked approximate (≈).", "R5"], ["Rule-breaking past emails are counted, with a ⚠ count beside each total.", "R5"]],
+      example: "26 sent · 24 delivered · 15 unique opens (from 17) · 4 positive replies · 1 client won." },
+    { id: "stops", type: "step", x: 1019, y: 330, w: 216, h: 64, title: "Stop rules", sub: "and follow-up schedule",
+      what: "Plans each follow-up, and cancels every pending one the moment that contact replies, bounces or unsubscribes.",
+      how: "The schedule matches the history: a second email three days after the first.",
+      takes: "Campaign events + schedule", gives: "Due, cancelled or paused follow-ups",
+      rules: [["Email 1, then email 2 three days later. No third email.", "R6"], ["A reply, bounce or unsubscribe stops all pending follow-ups to that company, including its other postings.", "R6"], ["\"No thanks\" closes the lead as \"not now\". Re-contact needs approval, 90 days and a new reason.", "R6"], ["An unsubscribe is permanent.", "R6"]],
+      example: "Harborwell unsubscribed on JOB-004, so JOB-030 is stopped too." },
+
+    // ---------- The App · dashboard ----------
+    { id: "dashboard", type: "dash", frame: true, x: 268, y: 516, w: 984, h: 160, title: "Dashboard", sub: "the front-end: what employees see and use",
+      what: "The front-end of the app: the one screen the Real Hires team uses. Everything processing produces shows up here.",
+      how: "Five parts: ranked opportunities, data & filters, leads, campaign funnel and A/B comparison.",
+      takes: "Processing results", gives: "One readable screen",
+      rules: [["Shows results only. Decisions are made by the rules, or by an employee.", "R7"], ["Every number comes with its reason.", "R7"], ["Correctness over appearance.", "R7"]],
+      example: "Opens with the sample data already loaded." },
+    { id: "ranked", type: "dash", tile: true, x: 284, y: 588, w: 180, h: 64, title: "Ranked opportunities", sub: "best leads first",
+      what: "Eligible leads ranked by priority score, each with its three-part breakdown, so anyone can see why it ranks where it does.",
+      how: "Sort by any column. Click a lead to see its score, candidate, emails and follow-ups.",
+      takes: "Priority scores", gives: "Who to contact first",
+      rules: [["Eligible leads rank first.", "R2"], ["Leads waiting for verification are marked \"pending\".", "R2"], ["Ineligible leads aren't ranked.", "R2"]],
+      example: "#1 Northline (100), then Seabrook, Goldleaf and Brookfield (90)." },
+    { id: "data", type: "dash", tile: true, x: 476, y: 588, w: 180, h: 64, title: "Data & filters", sub: "industry and role",
+      what: "Filters by industry and role, plus data notes that point out anything odd in the files without changing it.",
+      how: "Pick an industry or role, and the list, funnel and A/B numbers update together.",
+      takes: "Normalized data", gives: "A filtered view",
+      rules: [["Industry labels are used as given. Odd ones are noted, never silently fixed.", "R7"], ["The role filter uses the normalized job title.", "R7"], ["New CSV files can be imported here.", "R1"]],
+      example: "Oakline Legal Group is labelled \"E-commerce\". It's shown as is, with a note." },
+    { id: "leads", type: "dash", tile: true, x: 668, y: 588, w: 180, h: 64, title: "Leads", sub: "status and why",
+      what: "Every lead with its status (eligible, needs verification or ineligible) and the reason. Repeat postings show as one lead.",
+      how: "Employees verify unclear leads here, and pick the record when repeat postings disagree.",
+      takes: "Eligibility results", gives: "Status + reason per lead",
+      rules: [["Every status shows the rule that set it.", "R1"], ["Shows how duplicates were handled.", "R1"], ["Unclear leads wait here for an employee.", "R1"]],
+      example: "Harborwell's repeats disagree on remote policy, so they wait for an employee." },
+    { id: "funnel", type: "dash", tile: true, x: 860, y: 588, w: 180, h: 64, title: "Campaign funnel", sub: "sent → client won",
+      what: "How far the emails got: sent, delivered, opened, replied, meetings booked, clients won.",
+      how: "Each stage shows its count, with a ⚠ count for rule-breaking past emails.",
+      takes: "Campaign tracking", gives: "Stage-by-stage counts",
+      rules: [["Unique opens, one per email.", "R5"], ["Open rate marked ≈.", "R5"], ["⚠ counts shown beside totals, never hidden.", "R5"]],
+      example: "26 sent → 24 delivered → 15 opened → 4 positive replies → 2 meetings → 1 client won." },
+    { id: "ab", type: "dash", tile: true, x: 1052, y: 588, w: 180, h: 64, title: "A/B comparison", sub: "A vs B at each step",
+      what: "Variant A (candidate-first) and variant B (process-first) side by side, at every stage of the funnel.",
+      how: "Rates are worked out per variant, so the two compare fairly.",
+      takes: "Campaign tracking", gives: "A vs B numbers",
+      rules: [["Same stages as the funnel, split by variant.", "R5"], ["About 13 emails each: too few to call a winner, and it says so.", "R7"]],
+      example: "Positive replies: A 3 of 12 delivered · B 1 of 12." },
+
+    // ---------- People ----------
+    { id: "employee", type: "emp", x: 24, y: 560, w: 200, h: 72, title: "Employee", sub: "Real Hires team member",
+      what: "The person using the app. They read the dashboard and make the calls the rules won't make alone.",
+      how: "Everything they do happens on the dashboard, and every decision is saved.",
+      takes: "The dashboard", gives: "Decisions",
+      rules: [["Verifies leads with unclear remote eligibility.", "R1"], ["Picks the record when repeat postings disagree.", "R1"], ["Can move a candidate to a different company.", "R3"], ["Every decision is logged and can be undone.", null]],
+      example: "Verifying Brightwater moves candidate C-002 to them, because Brightwater already replied positively." }
+  ];
+
+  var EDGES = [
+    { d: "M224 172 H280" },
+    { d: "M500 172 H525" },
+    { d: "M745 172 H770" },
+    { d: "M990 172 H1015" },
+    { d: "M224 244 H882 V208", label: "skills & availability", lx: 560, ly: 238 },
+    { d: "M1127 204 V272 H392 V326", label: "ranked eligible leads", lx: 760, ly: 266 },
+    { d: "M500 362 H525" },
+    { d: "M745 362 H770" },
+    { d: "M990 362 H1015" },
+    { d: "M1190 330 V304 H637 V326", back: true, label: "blocks the next send", lx: 915, ly: 298 },
+    { d: "M224 440 H882 V398", label: "past email events", lx: 560, ly: 434 },
+    { d: "M760 486 V512", label: "results", lx: 770, ly: 503, anchor: "start" },
+    { d: "M230 596 H264", both: true, label: "uses & decides", lx: 124, ly: 654 }
+  ];
+
+  // ---------- drawing ----------
+  var NS = "http://www.w3.org/2000/svg";
+  var svg = document.getElementById("map");
+  function el(name, attrs, text) {
+    var e = document.createElementNS(NS, name);
+    Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, attrs[k]); });
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  var defs = el("defs");
+  var marker = el("marker", { id: "arrow", viewBox: "0 0 10 10", refX: "9", refY: "5", markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse" });
+  marker.appendChild(el("path", { d: "M0 0 L10 5 L0 10 z", fill: "#a5abb6" }));
+  defs.appendChild(marker);
+  svg.appendChild(defs);
+
+  svg.appendChild(el("rect", { class: "region-input", x: 10, y: 60, width: 228, height: 430, rx: 16 }));
+  svg.appendChild(el("text", { class: "region-label", x: 26, y: 92 }, "INPUT"));
+  svg.appendChild(el("text", { class: "region-sub", x: 26, y: 112 }, "three CSV files"));
+  svg.appendChild(el("text", { class: "sub-label", x: 26, y: 548 }, "PEOPLE"));
+
+  svg.appendChild(el("rect", { class: "region-app", x: 252, y: 60, width: 1016, height: 624, rx: 18 }));
+  svg.appendChild(el("text", { class: "region-label", x: 272, y: 92 }, "THE APP"));
+  svg.appendChild(el("rect", { class: "region-engine", x: 268, y: 104, width: 984, height: 382, rx: 14 }));
+  svg.appendChild(el("text", { class: "sub-label", x: 284, y: 127 }, "PROCESSING · RULES ENGINE"));
+  svg.appendChild(el("text", { class: "sub-note", x: 478, y: 127 }, "The app's logic. Runs each step in order whenever data is loaded or an employee decides."));
+
+  EDGES.forEach(function (e) {
+    var attrs = { class: "edge" + (e.back ? " back" : ""), d: e.d, "marker-end": "url(#arrow)" };
+    if (e.both) attrs["marker-start"] = "url(#arrow)";
+    svg.appendChild(el("path", attrs));
+  });
+
+  var nodeEls = {};
+  NODES.forEach(function (n) {
+    var g = el("g", { class: "node" + (n.frame ? " dash-frame" : ""), tabindex: "0", role: "button", "aria-label": n.title + ": " + n.sub });
+    g.appendChild(el("rect", { class: "card", x: n.x, y: n.y, width: n.w, height: n.h, rx: n.frame ? 14 : 11 }));
+    var cy = n.y + n.h / 2;
+    if (n.frame) {
+      g.appendChild(el("circle", { cx: n.x + 22, cy: n.y + 28, r: 5, fill: TYPES[n.type].color }));
+      g.appendChild(el("text", { class: "t", x: n.x + 36, y: n.y + 33 }, n.title));
+      g.appendChild(el("text", { class: "s", x: n.x + 128, y: n.y + 33 }, n.sub));
+    } else if (n.tile) {
+      g.appendChild(el("text", { class: "t", x: n.x + n.w / 2, y: cy - 3, "text-anchor": "middle" }, n.title));
+      g.appendChild(el("text", { class: "s", x: n.x + n.w / 2, y: cy + 16, "text-anchor": "middle" }, n.sub));
+    } else if (n.type === "emp") {
+      var cx = n.x + 30;
+      g.appendChild(el("circle", { cx: cx, cy: cy, r: 17, fill: "#fff5df" }));
+      g.appendChild(el("circle", { cx: cx, cy: cy - 5, r: 5, fill: TYPES.emp.color }));
+      g.appendChild(el("path", { d: "M" + (cx - 9) + " " + (cy + 10) + " a9 8 0 0 1 18 0 z", fill: TYPES.emp.color }));
+      g.appendChild(el("text", { class: "t", x: n.x + 58, y: cy - 3 }, n.title));
+      g.appendChild(el("text", { class: "s", x: n.x + 58, y: cy + 16 }, n.sub));
+    } else {
+      g.appendChild(el("circle", { cx: n.x + 18, cy: cy - 8, r: 5, fill: TYPES[n.type].color }));
+      g.appendChild(el("text", { class: "t", x: n.x + 30, y: cy - 3 }, n.title));
+      g.appendChild(el("text", { class: "s", x: n.x + 30, y: cy + 16 }, n.sub));
     }
-    function mark() {
-      var c = current();
-      links.forEach(function (a, i) { a.classList.toggle("on", i === c); });
+    g.addEventListener("click", function (ev) { ev.stopPropagation(); select(n.id); });
+    g.addEventListener("keydown", function (ev) { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); ev.stopPropagation(); select(n.id); } });
+    svg.appendChild(g);
+    nodeEls[n.id] = g;
+  });
+
+  EDGES.forEach(function (e) {
+    if (e.label) svg.appendChild(el("text", { class: "edge-label", x: e.lx, y: e.ly, "text-anchor": e.anchor || "middle" }, e.label));
+  });
+
+  // ---------- zoom ----------
+  var scroller = document.getElementById("map-scroll");
+  var inner = document.getElementById("map-inner");
+  var zoom = 1;
+  var Z_MIN = 0.6, Z_MAX = 2.5;
+
+  function applyZoom(keepCenter) {
+    var cxRatio = keepCenter ? (scroller.scrollLeft + scroller.clientWidth / 2) / inner.offsetWidth : 0;
+    var cyRatio = keepCenter ? (scroller.scrollTop + scroller.clientHeight / 2) / inner.offsetHeight : 0;
+    // "Fit" = the whole diagram visible: limited by the box width and by the visible height.
+    var maxH = window.innerHeight * 0.82 - 30;
+    var fitW = Math.min(scroller.clientWidth, maxH * 1280 / 690 + 28);
+    inner.style.width = Math.round(Math.max(320, fitW) * zoom) + "px";
+    document.getElementById("zoom-level").textContent = Math.round(zoom * 100) + "%";
+    if (keepCenter) {
+      scroller.scrollLeft = cxRatio * inner.offsetWidth - scroller.clientWidth / 2;
+      scroller.scrollTop = cyRatio * inner.offsetHeight - scroller.clientHeight / 2;
     }
-    window.addEventListener("scroll", mark, { passive: true });
-    mark();
-    document.addEventListener("keydown", function (e) {
-      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
-      var c = current() + (e.key === "ArrowRight" ? 1 : -1);
-      c = Math.max(0, Math.min(ids.length - 1, c));
-      document.getElementById(ids[c]).scrollIntoView({ behavior: "smooth" });
-      e.preventDefault();
+    if (current && !bubble.hidden) placeBubble(byId(current));
+  }
+  function setZoom(z) { zoom = Math.max(Z_MIN, Math.min(Z_MAX, Math.round(z * 100) / 100)); applyZoom(true); }
+  document.getElementById("zoom-in").addEventListener("click", function () { setZoom(zoom * 1.2); });
+  document.getElementById("zoom-out").addEventListener("click", function () { setZoom(zoom / 1.2); });
+  document.getElementById("zoom-fit").addEventListener("click", function () { zoom = 1; applyZoom(false); scroller.scrollLeft = 0; scroller.scrollTop = 0; });
+  scroller.addEventListener("wheel", function (e) {
+    if (!e.ctrlKey && !e.metaKey) return;
+    e.preventDefault();
+    setZoom(zoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1));
+  }, { passive: false });
+  window.addEventListener("resize", function () { applyZoom(false); });
+
+  // ---------- bubble + panel ----------
+  var bubble = document.getElementById("bubble");
+  var panel = document.getElementById("panel");
+  var current = null;
+
+  function byId(id) { return NODES.filter(function (n) { return n.id === id; })[0]; }
+  function h(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  function renderIntro() {
+    panel.textContent = "";
+    panel.appendChild(h("div", "kicker", "Start here"));
+    panel.appendChild(h("h2", null, "Reading the map"));
+    panel.appendChild(h("p", "muted", "Click any box. A short explanation pops up beside it, and this panel lists the rules it follows."));
+    var ol = h("ol", "steps-list");
+    [["Input", "Three CSV files: job postings, candidates and campaign events."],
+     ["Processing", "The app's rules engine. Normalizes, checks eligibility, matches candidates, scores leads, writes emails, and checks every send."],
+     ["Dashboard", "The front-end. Ranked opportunities, data & filters, leads, campaign funnel and A/B comparison."],
+     ["Employee", "Uses the dashboard, and makes the calls the rules won't make alone."]].forEach(function (x) {
+      var li = h("li"); li.appendChild(h("b", null, x[0])); li.appendChild(h("div", "muted", x[1])); ol.appendChild(li);
     });
-  })();
+    panel.appendChild(ol);
+    panel.appendChild(h("h4", null, "Ground rules everywhere"));
+    var r = h("ul", "rules");
+    ["Synthetic data only. Nothing is sent, scraped or called.", "Unclear means \"ask an employee\", never \"assume yes\".", "Every number and decision comes with its reason.", "Past results are reported as recorded, with ⚠ where they broke today's rules."].forEach(function (t) { r.appendChild(h("li", null, t)); });
+    panel.appendChild(r);
+  }
+
+  function pill(n) {
+    var t = TYPES[n.type];
+    var p = h("span", "type-pill"); var dot = h("i"); dot.style.background = t.color;
+    p.appendChild(dot); p.appendChild(document.createTextNode(t.label)); p.style.color = t.color;
+    return p;
+  }
+
+  function renderPanel(n) {
+    panel.textContent = "";
+    panel.appendChild(pill(n));
+    panel.appendChild(h("h2", null, n.title));
+    panel.appendChild(h("div", "where", TYPES[n.type].where));
+    var io = h("div", "io");
+    var a = h("div"); a.appendChild(h("b", null, "Takes in")); a.appendChild(document.createTextNode(n.takes));
+    var b = h("div"); b.appendChild(h("b", null, "Gives out")); b.appendChild(document.createTextNode(n.gives));
+    io.appendChild(a); io.appendChild(b);
+    panel.appendChild(io);
+    panel.appendChild(h("h4", null, "Rules it follows"));
+    var ul = h("ul", "rules");
+    n.rules.forEach(function (r) { var li = h("li", null, r[0]); if (r[1]) li.appendChild(h("span", "req", r[1])); ul.appendChild(li); });
+    panel.appendChild(ul);
+    panel.appendChild(h("h4", null, "In the sample data"));
+    panel.appendChild(h("div", "example", n.example));
+  }
+
+  function placeBubble(n) {
+    var t = TYPES[n.type];
+    var typeEl = document.getElementById("bubble-type");
+    typeEl.textContent = t.label; typeEl.style.color = t.color;
+    document.getElementById("bubble-title").textContent = n.title;
+    document.getElementById("bubble-what").textContent = n.what;
+    document.getElementById("bubble-how").textContent = n.how;
+    bubble.hidden = false;
+    var target = n.frame ? nodeEls[n.id].querySelector("text") : nodeEls[n.id];
+    var r = target.getBoundingClientRect(), box = inner.getBoundingClientRect();
+    var bw = bubble.offsetWidth, bh = bubble.offsetHeight;
+    var left = r.left - box.left + (n.frame ? 0 : r.width / 2 - bw / 2);
+    left = Math.max(8, Math.min(left, inner.clientWidth - bw - 8));
+    var below = r.bottom - box.top + 10;
+    var above = r.top - box.top - bh - 10;
+    var top = (below + bh <= inner.clientHeight || above < 0) ? below : above;
+    bubble.style.left = left + "px";
+    bubble.style.top = top + "px";
+  }
+
+  function select(id) {
+    if (current) nodeEls[current].classList.remove("on");
+    current = id;
+    var n = byId(id);
+    nodeEls[id].classList.add("on");
+    renderPanel(n);
+    placeBubble(n);
+  }
+
+  function closeBubble() {
+    bubble.hidden = true;
+    if (current) { var g = nodeEls[current]; g.classList.remove("on"); current = null; g.focus({ preventScroll: true }); }
+  }
+
+  document.getElementById("bubble-x").addEventListener("click", function (e) { e.stopPropagation(); closeBubble(); });
+  bubble.addEventListener("click", function (e) { e.stopPropagation(); });
+  document.addEventListener("click", function (e) {
+    if (bubble.hidden || panel.contains(e.target) || e.target.closest(".zoom")) return;
+    closeBubble();
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !bubble.hidden) closeBubble(); });
+
+  applyZoom(false);
+  renderIntro();
+})();
 </script>
 </body>
 </html>

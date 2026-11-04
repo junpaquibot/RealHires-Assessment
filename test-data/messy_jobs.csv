@@ -1,0 +1,8 @@
+posting_id,company,domain,industry,company_employees,title,required_skills,remote_policy,us_hours_required,posted_days_ago,repost_count,salary_usd_per_year,notes
+MSY-001,"  Acme, Inc.  ",HTTPS://WWW.Acme.example/careers,Accounting, 25 ,  bookkeeper ,QuickBooks; Reconciliation ;EXCEL,global,Y,3,0,"$48,000",URGENT start
+MSY-002,Acme Inc,acme.example,Accounting,25,Bookkeeper,quickbooks;reconciliation;excel,GLOBAL,yes,10,1,48000,role reposted
+MSY-003,<script>alert(1)</script> Labs,scriptlabs.example,Software,12,Support Agent,support tickets;CRM,on-site,no,5,0,40000,
+MSY-004,Vague Co,vague.example,Retail,30,Executive Assistant,calendar management;Google Workspace;English,Remote,unknown,2,0,50000,
+MSY-005,No Title Co,notitle.example,Retail,10,,CRM,GLOBAL,no,1,0,30000,
+MSY-001,Duplicate Id Co,dup.example,Retail,10,Clerk,CRM,GLOBAL,no,1,0,30000,
+MSY-006,Licensed Pharmacy,pharmacy.example,Healthcare,40,Pharmacy Technician,licensed pharmacy tech;inventory,GLOBAL,no,abc,0,45000,
